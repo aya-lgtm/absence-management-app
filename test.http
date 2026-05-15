@@ -1,0 +1,18 @@
+### Test 1 - Route par défaut
+GET http://localhost/gestion-absences/backend/api/index.php
+
+###
+
+### Test 2 - Login Admin
+POST http://localhost/gestion-absences/backend/api/index.php/login
+Content-Type: application/json
+
+{
+    "email": "admin@hem.ma",
+    "password": "Password123"
+}
+
+###
+
+### Test 3 - Stats générales
+GET http://localhost/gestion-absences/backend/api/index.php/stats/general
