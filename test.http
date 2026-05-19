@@ -1,0 +1,369 @@
+# ============================================================
+# TESTS COMPLETS API - GESTION DES ABSENCES
+# Remplace TOKEN par le token recu apres le login
+# ============================================================
+
+@baseUrl = http://localhost/gestion-absences/backend/api/index.php
+@token = eyJ1c2VyX2lkIjo1LCJleHAiOjE3Nzg5MjUyMDksImlhdCI6MTc3ODgzODgwOX0=.e65830f7e7a4a1d0bafb73a0de4f5ff8d86d8d6ba5961172beb0f31b1b86c938
+
+# ============================================================
+# 1. AUTHENTIFICATION
+# ============================================================
+
+### 1.1 - Login Admin (doit retourner un token)
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "admin@hem.ma",
+    "password": "Password123"
+}
+
+###
+
+### 1.2 - Login Professeur
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "prof@hem.ma",
+    "password": "Password123"
+}
+
+###
+
+### 1.3 - Login mauvais mot de passe (doit retourner erreur 401)
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "admin@hem.ma",
+    "password": "mauvaismdp"
+}
+
+###
+
+### 1.4 - Creer un nouveau compte professeur
+POST {{baseUrl}}/register
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "first_name": "Mohammed",
+    "last_name": "Benali",
+    "email": "benali@hem.ma",
+    "password": "Password123",
+    "role": "professor",
+    "campus_id": 1
+}
+
+###
+
+### 1.5 - Accès sans token (doit retourner erreur 401)
+GET {{baseUrl}}/students
+
+# ============================================================
+# 2. ETUDIANTS
+# ============================================================
+
+###
+
+### 2.1 - Liste tous les etudiants
+GET {{baseUrl}}/students
+Authorization: Bearer {{token}}
+
+###
+
+### 2.2 - Filtrer par filiere
+GET {{baseUrl}}/students?filiere_id=1
+Authorization: Bearer {{token}}
+
+###
+
+### 2.3 - Filtrer par campus
+GET {{baseUrl}}/students?campus_id=1
+Authorization: Bearer {{token}}
+
+###
+
+### 2.4 - Rechercher un etudiant par nom
+GET {{baseUrl}}/students?search=Arroub
+Authorization: Bearer {{token}}
+
+###
+
+### 2.5 - Detail d'un etudiant (id=1)
+GET {{baseUrl}}/students/1
+Authorization: Bearer {{token}}
+
+###
+
+### 2.6 - Creer un etudiant
+POST {{baseUrl}}/students
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "first_name": "Sara",
+    "last_name": "Alami",
+    "email": "sara@hem.ma",
+    "code_apogee": "ES2024002",
+    "filiere_id": 1,
+    "campus_id": 1
+}
+
+###
+
+### 2.7 - Modifier un etudiant (id=1)
+PUT {{baseUrl}}/students/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "first_name": "Aya",
+    "last_name": "Arroub",
+    "email": "aya.arroub@hem.ma",
+    "code_apogee": "ES2024001"
+}
+
+###
+
+### 2.8 - Etudiant inexistant (doit retourner 404)
+GET {{baseUrl}}/students/9999
+Authorization: Bearer {{token}}
+
+# ============================================================
+# 3. SEANCES
+# ============================================================
+
+###
+
+### 3.1 - Creer une seance (matiere id=1, filiere id=1)
+POST {{baseUrl}}/sessions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "subject_id": 1,
+    "filiere_id": 1,
+    "session_date": "2026-05-15",
+    "start_time": "08:00:00",
+    "end_time": "09:30:00"
+}
+
+###
+
+### 3.2 - Creer une 2eme seance
+POST {{baseUrl}}/sessions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "subject_id": 2,
+    "filiere_id": 1,
+    "session_date": "2026-05-15",
+    "start_time": "10:00:00",
+    "end_time": "11:30:00"
+}
+
+###
+
+### 3.3 - Liste toutes les seances
+GET {{baseUrl}}/sessions
+Authorization: Bearer {{token}}
+
+###
+
+### 3.4 - Filtrer seances par date
+GET {{baseUrl}}/sessions?date=2026-05-15
+Authorization: Bearer {{token}}
+
+###
+
+### 3.5 - Detail d'une seance avec liste etudiants (id=1)
+GET {{baseUrl}}/sessions/1
+Authorization: Bearer {{token}}
+
+# ============================================================
+# 4. ABSENCES
+# ============================================================
+
+###
+
+### 4.1 - Enregistrer l'appel complet (seance 1)
+POST {{baseUrl}}/absences
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "session_id": 1,
+    "absences": [
+        { "student_id": 1, "is_absent": true,  "delay_minutes": 0  },
+        { "student_id": 2, "is_absent": false, "delay_minutes": 20 }
+    ]
+}
+
+###
+
+### 4.2 - Enregistrer appel seance 2
+POST {{baseUrl}}/absences
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "session_id": 2,
+    "absences": [
+        { "student_id": 1, "is_absent": true,  "delay_minutes": 0 },
+        { "student_id": 2, "is_absent": true,  "delay_minutes": 0 }
+    ]
+}
+
+###
+
+### 4.3 - Liste toutes les absences
+GET {{baseUrl}}/absences
+Authorization: Bearer {{token}}
+
+###
+
+### 4.4 - Absences d'un etudiant specifique (id=1)
+GET {{baseUrl}}/absences/1
+Authorization: Bearer {{token}}
+
+###
+
+### 4.5 - Filtrer absences par date
+GET {{baseUrl}}/absences?date=2026-05-15
+Authorization: Bearer {{token}}
+
+###
+
+### 4.6 - Justifier une absence (id=1)
+PUT {{baseUrl}}/absences/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "justification": "Certificat medical fourni"
+}
+
+# ============================================================
+# 5. STATISTIQUES
+# ============================================================
+
+###
+
+### 5.1 - Stats generales (total etudiants, absences, retards)
+GET {{baseUrl}}/stats/general
+Authorization: Bearer {{token}}
+
+###
+
+### 5.2 - Stats d'un etudiant (id=1)
+GET {{baseUrl}}/stats/student/1
+Authorization: Bearer {{token}}
+
+###
+
+### 5.3 - Stats d'une matiere (id=1)
+GET {{baseUrl}}/stats/subject/1
+Authorization: Bearer {{token}}
+
+###
+
+### 5.4 - Alertes (etudiants depassant les seuils)
+GET {{baseUrl}}/stats/alerts
+Authorization: Bearer {{token}}
+
+# ============================================================
+# 6. UTILISATEURS (admin only)
+# ============================================================
+
+###
+
+### 6.1 - Liste tous les utilisateurs
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+###
+
+### 6.2 - Creer un utilisateur assistant
+POST {{baseUrl}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "first_name": "Fatima",
+    "last_name": "Zahra",
+    "email": "fatima@hem.ma",
+    "password": "Password123",
+    "role": "assistant",
+    "campus_id": 1
+}
+
+###
+
+### 6.3 - Modifier un utilisateur (id=1)
+PUT {{baseUrl}}/users/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "first_name": "Admin",
+    "last_name": "HEM",
+    "email": "admin@hem.ma",
+    "role": "admin",
+    "campus_id": 1,
+    "is_active": 1
+}
+
+###
+
+### 6.4 - Acces utilisateurs sans etre admin (doit retourner 403)
+GET {{baseUrl}}/users
+Authorization: Bearer TOKEN_PROF_ICI
+
+# ============================================================
+# 7. TESTS REGLES METIER AUTOMATIQUES
+# ============================================================
+
+###
+
+### 7.1 - Creer seances supplementaires pour tester les seuils
+POST {{baseUrl}}/sessions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "subject_id": 1,
+    "filiere_id": 1,
+    "session_date": "2026-05-16",
+    "start_time": "08:00:00",
+    "end_time": "09:30:00"
+}
+
+###
+
+### 7.2 - 3eme absence etudiant 1 (doit declencher warning_1 - note participation 00/20)
+POST {{baseUrl}}/absences
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "session_id": 3,
+    "absences": [
+        { "student_id": 1, "is_absent": true, "delay_minutes": 0 }
+    ]
+}
+
+###
+
+### 7.3 - Verifier l'etat de l'etudiant 1 (doit etre warning_1)
+GET {{baseUrl}}/stats/student/1
+Authorization: Bearer {{token}}
+
+###
+
+### 7.4 - Verifier les alertes (etudiant 1 doit apparaitre)
+GET {{baseUrl}}/stats/alerts
+Authorization: Bearer {{token}}

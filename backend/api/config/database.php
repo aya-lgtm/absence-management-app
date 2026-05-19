@@ -1,0 +1,32 @@
+<?php
+// ============================================================
+// CONFIG BASE DE DONNÉES - NE PAS COMMITTER SUR GITHUB
+// ============================================================
+
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'gestion_absences');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_CHARSET', 'utf8mb4');
+
+// Clé secrète pour les tokens JWT
+define('JWT_SECRET', 'hem_absences_secret_key_2024_change_me');
+define('JWT_EXPIRY', 86400); // 24 heures en secondes
+
+function getDB() {
+    static $pdo = null;
+    if ($pdo === null) {
+        try {
+            $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
+            $pdo = new PDO($dsn, DB_USER, DB_PASS, [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            die(json_encode(['error' => 'Connexion BDD échouée : ' . $e->getMessage()]));
+        }
+    }
+    return $pdo;
+}
