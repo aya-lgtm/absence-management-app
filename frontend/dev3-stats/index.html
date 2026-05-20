@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Absences — Statistiques</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand">📊 HEM — Statistiques</div>
+        <div class="nav-links">
+            <button onclick="showSection('stats')"      class="nav-btn active">Statistiques</button>
+            <button onclick="showSection('absences')"   class="nav-btn">Suivi Absences</button>
+            <button onclick="showSection('states')"     class="nav-btn">États Auto</button>
+            <button onclick="showSection('progress')"   class="nav-btn">Avancement</button>
+            <button onclick="showSection('notifs')"     class="nav-btn">
+                🔔 Alertes <span id="notif-badge" class="badge">0</span>
+            </button>
+        </div>
+        <button onclick="logout()" class="btn-logout">Déconnexion</button>
+    </nav>
+
+    <!-- LOGIN (affiché si pas connecté) -->
+    <div id="login-section" class="login-container">
+        <div class="login-card">
+            <h2>🔐 Connexion</h2>
+            <input type="email"    id="email"    placeholder="Email" class="input"/>
+            <input type="password" id="password" placeholder="Mot de passe" class="input"/>
+            <button onclick="login()" class="btn-primary">Se connecter</button>
+            <p id="login-error" class="error"></p>
+        </div>
+    </div>
+
+    <!-- CONTENU PRINCIPAL -->
+    <div id="main-content" style="display:none">
+
+        <!-- STATISTIQUES GÉNÉRALES -->
+        <section id="section-stats" class="section active">
+            <h2>📊 Statistiques Générales</h2>
+            <div class="stats-grid">
+                <div class="stat-box blue">
+                    <span class="stat-number" id="total-students">0</span>
+                    <span class="stat-label">Étudiants</span>
+                </div>
+                <div class="stat-box red">
+                    <span class="stat-number" id="total-absences">0</span>
+                    <span class="stat-label">Absences</span>
+                </div>
+                <div class="stat-box orange">
+                    <span class="stat-number" id="total-delays">0</span>
+                    <span class="stat-label">Retards</span>
+                </div>
+                <div class="stat-box purple">
+                    <span class="stat-number" id="total-alerts">0</span>
+                    <span class="stat-label">Alertes</span>
+                </div>
+            </div>
+
+            <h3>Stats par étudiant</h3>
+            <div class="search-bar">
+                <input type="number" id="student-id-input" 
+                       placeholder="ID étudiant" class="input"/>
+                <button onclick="searchStudent()" class="btn-primary">
+                    Rechercher
+                </button>
+            </div>
+            <div id="student-stats" class="cards-grid"></div>
+            <div class="global-info">
+                <p>Statut global : <strong id="global-status">-</strong></p>
+                <p>Rachettage : <strong id="rachettage">-</strong></p>
+            </div>
+        </section>
+
+        <!-- SUIVI ABSENCES -->
+        <section id="section-absences" class="section">
+            <h2>📋 Suivi des Absences</h2>
+            <div class="filters">
+                <input type="date" id="filter-date" class="input"/>
+                <button onclick="filterByDate(
+                    document.getElementById('filter-date').value
+                )" class="btn-secondary">Filtrer par date</button>
+                <button onclick="loadAbsences()" 
+                        class="btn-secondary">Tout afficher</button>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Étudiant</th>
+                        <th>Matière</th>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Justifiée</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="absences-tbody"></tbody>
+            </table>
+        </section>
+
+        <!-- ÉTATS AUTOMATIQUES -->
+        <section id="section-states" class="section">
+            <h2>⚠️ États Automatiques</h2>
+            <div id="states-summary" class="summary-grid"></div>
+            <div id="states-container" class="states-list"></div>
+        </section>
+
+        <!-- AVANCEMENT FORMATION -->
+        <section id="section-progress" class="section">
+            <h2>📈 Avancement de Formation</h2>
+            <div id="global-progress"></div>
+            <div id="progress-container" class="progress-list"></div>
+        </section>
+
+        <!-- NOTIFICATIONS -->
+        <section id="section-notifs" class="section">
+            <h2>🔔 Notifications & Alertes</h2>
+            <button onclick="markAllAsRead()" class="btn-secondary">
+                Tout marquer comme lu
+            </button>
+            <div id="notifications-list" class="notifs-list"></div>
+        </section>
+
+    </div>
+
+    <script type="module">
+        import { loadGeneralStats, loadStudentStats, loadAlerts } 
+            from './js/statistics.js';
+        import { loadAbsences, justifyAbsence, filterByDate } 
+            from './js/absence-tracking.js';
+        import { loadAllStates } from './js/auto-states.js';
+        import { loadNotifications, markAllAsRead } 
+            from './js/notifications.js';
+        import { loadTrainingProgress } from './js/training-progress.js';
+
+        const API_BASE = 
+            'http://localhost/gestion-absences/backend/api/index.php';
+
+        // Login
+        window.login = async function() {
+            const email    = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch(`${API_BASE}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                localStorage.setItem('token', data.token);
+                document.getElementById('login-section').style.display  = 'none';
+                document.getElementById('main-content').style.display   = 'block';
+                loadAll();
+            } else {
+                document.getElementById('login-error').textContent = 
+                    'Email ou mot de passe incorrect';
+            }
+        };
+
+        // Charger tout
+        function loadAll() {
+            loadGeneralStats();
+            loadAbsences();
+            loadAllStates();
+            loadNotifications();
+            loadTrainingProgress();
+        }
+
+        // Rechercher étudiant
+        window.searchStudent = function() {
+            const id = document.getElementById('student-id-input').value;
+            if (id) loadStudentStats(id);
+        };
+
+        // Changer de section
+        window.showSection = function(name) {
+            document.querySelectorAll('.section').forEach(s => 
+                s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => 
+                b.classList.remove('active'));
+            document.getElementById(`section-${name}`)
+                    .classList.add('active');
+        };
+
+        // Logout
+        window.logout = function() {
+            localStorage.removeItem('token');
+            location.reload();
+        };
+
+        // Exposer fonctions globales
+        window.loadAbsences   = loadAbsences;
+        window.filterByDate   = filterByDate;
+        window.markAllAsRead  = markAllAsRead;
+
+        // Vérifier si déjà connecté
+        if (localStorage.getItem('token')) {
+            document.getElementById('login-section').style.display  = 'none';
+            document.getElementById('main-content').style.display   = 'block';
+            loadAll();
+        }
+    </script>
+</body>
+</html>
