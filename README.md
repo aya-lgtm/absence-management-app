@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+# student-management-app
+ Application web de gestion des étudiants - CRUD avec Express.js
+=======
  # Backend — Gestion des Absences API
 
 ## Stack
@@ -96,3 +100,4 @@ Authorization: Bearer <token>
 - **20 absences globales** → perte d'un rachettage
 - **40 absences globales** → perte des 2 rachettages + mention
 - **72 absences globales** → redoublant automatique
+>>>>>>> 2e8fa6ffbb4d2c50e7162fc6745085be8b50a738
