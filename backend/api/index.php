@@ -1,7 +1,6 @@
 <?php
-// ============================================================
-// API REST - POINT D'ENTRÉE PRINCIPAL
-// ============================================================
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -21,32 +20,41 @@ require_once __DIR__ . '/routes/absences.php';
 require_once __DIR__ . '/routes/sessions.php';
 require_once __DIR__ . '/routes/stats.php';
 require_once __DIR__ . '/routes/users.php';
+require_once __DIR__ . '/routes/filieres.php';
+require_once __DIR__ . '/routes/subjects.php';
+require_once __DIR__ . '/routes/groups.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
-$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Supprimer le prefixe du projet
-$uri    = preg_replace('#^/gestion-absences/backend/api(/index\.php)?#', '', $uri);
-$parts  = explode('/', trim($uri, '/'));
-$route  = $parts[0] ?? '';
-$id     = $parts[1] ?? null;
+// Routing — support ?route= ET URI
+if (isset($_GET['route']) && !empty($_GET['route'])) {
+    $parts = explode('/', trim($_GET['route'], '/'));
+} else {
+    $uri   = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $uri   = preg_replace('#^.*?/backend/api(/index\.php)?#', '', $uri);
+    $parts = explode('/', trim($uri, '/'));
+}
+
+$route = $parts[0] ?? '';
+$id    = $parts[1] ?? null;
+if (!$id && !empty($_GET['id'])) {
+    $id = $_GET['id'];
+}
 
 switch ($route) {
 
-    // ── AUTH ──────────────────────────────────────────────
     case 'login':
         if ($method === 'POST') handleLogin();
         break;
 
-    case 'logout':
-        if ($method === 'POST') { requireAuth(); handleLogout(); }
-        break;
+        case 'register':
+            if ($method === 'POST') { requireAuth('admin'); handleRegister(); }
+            break;
 
     case 'register':
         if ($method === 'POST') { requireAuth('admin'); handleRegister(); }
         break;
 
-    // ── ÉTUDIANTS ─────────────────────────────────────────
     case 'students':
         requireAuth();
         if ($method === 'GET' && !$id)   getStudents();
@@ -61,7 +69,6 @@ switch ($route) {
         if ($method === 'POST') importStudentsCSV();
         break;
 
-    // ── ABSENCES ──────────────────────────────────────────
     case 'absences':
         requireAuth();
         if ($method === 'GET' && !$id)  getAbsences();
@@ -70,7 +77,6 @@ switch ($route) {
         if ($method === 'PUT' && $id)   justifyAbsence($id);
         break;
 
-    // ── SÉANCES ───────────────────────────────────────────
     case 'sessions':
         requireAuth();
         if ($method === 'GET' && !$id)  getSessions();
@@ -78,24 +84,59 @@ switch ($route) {
         if ($method === 'POST')         createSession();
         break;
 
-    // ── STATISTIQUES ──────────────────────────────────────
-    case 'stats':
-        requireAuth();
-        $sub = $parts[1] ?? 'general';
-        if ($sub === 'general') getGeneralStats();
-        if ($sub === 'student') getStudentStats($parts[2] ?? null);
-        if ($sub === 'subject') getSubjectStats($parts[2] ?? null);
-        if ($sub === 'alerts')  getAlerts();
-        break;
+        case 'stats':
+            requireAuth();
+            $sub = $parts[1] ?? 'general';
+            if ($sub === 'general')   getGeneralStats();
+            if ($sub === 'student')   getStudentStats($parts[2] ?? null);
+            if ($sub === 'subject')   getSubjectStats($parts[2] ?? null);
+            if ($sub === 'alerts')    getAlerts();
+            break;
+        
+        // ← AJOUTER CE NOUVEAU CASE :
+        case 'dashboard':
+            requireAuth();
+            $sub = $parts[1] ?? '';
+            if ($sub === 'stats')           getDashboardStats();
+            if ($sub === 'alerts')          getDashboardAlerts();
+            if ($sub === 'appels-non-faits') getDashboardAppels();
+            if ($sub === 'activite')        getDashboardActivite();
+            break;
 
-    // ── UTILISATEURS ──────────────────────────────────────
     case 'users':
         requireAuth('admin');
         if ($method === 'GET')           getUsers();
         if ($method === 'POST')          createUser();
         if ($method === 'PUT' && $id)    updateUser($id);
         if ($method === 'DELETE' && $id) deleteUser($id);
+        if ($method === 'PATCH' && $id)  resetUserPassword($id);
         break;
+
+        case 'filieres':
+            requireAuth();
+            if ($method === 'GET')           getFilieres();
+            if ($method === 'POST')          createFiliere();
+            if ($method === 'PUT'  && $id)   updateFiliere($id);
+            if ($method === 'DELETE' && $id) deleteFiliere($id);
+            break;
+
+
+     
+            case 'subjects':
+                requireAuth();
+                if ($method === 'GET')           getMatieres();
+                if ($method === 'POST')          createMatiere();
+                if ($method === 'PUT'  && $id)   updateMatiere($id);
+                if ($method === 'DELETE' && $id) deleteMatiere($id);
+                break;
+            
+            case 'groups':
+                requireAuth();
+                if ($method === 'GET')           getGroupes();
+                if ($method === 'POST')          createGroupe();
+                if ($method === 'PUT'  && $id)   updateGroupe($id);
+                if ($method === 'DELETE' && $id) deleteGroupe($id);
+                break;
 
     default:
         http_response_code(404);

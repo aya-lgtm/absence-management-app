@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HEM — Tableau de bord</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#4361EE;--blue-d:#3451d1;--blue-bg:#EEF2FF;
+  --green:#2DC653;--green-bg:#EDFBF1;
+  --orange:#FF6B2B;--orange-bg:#FFF0EA;
+  --purple:#9B5DE5;--purple-bg:#F3EBFF;
+  --red:#F72585;--red-bg:#FEE8F2;
+  --teal:#00B4D8;--yellow:#FFB703;
+  --sw:210px;--th:64px;
+  --txt:#1a1a2e;--muted:#8892a4;--brd:#E8EDF5;--bg:#F4F6FB;
+  --radius:14px;--shadow:0 2px 12px rgba(67,97,238,.08);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
+
+/* HAMBURGER */
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;backdrop-filter:blur(2px)}
+#ov.show{display:block}
+.hbg{display:none;position:fixed;top:13px;left:14px;z-index:200;background:#fff;border:1px solid var(--brd);border-radius:9px;width:38px;height:38px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(67,97,238,.12)}
+.hbg svg{width:18px;height:18px;stroke:var(--blue);stroke-width:2;fill:none}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;border-right:1px solid var(--brd);transition:transform .25s ease}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--brd);flex-shrink:0}
+.logo-w{display:flex;align-items:center;gap:10px}
+.logo-box{width:42px;height:42px;border:1.5px solid #dde3f4;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;overflow:hidden}
+.logo-box img{width:100%;height:100%;object-fit:contain;padding:3px}
+.logo-hem{font-size:19px;font-weight:900;color:var(--blue);letter-spacing:-1px;line-height:1}
+.logo-bs{font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-top:1px}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+.ni{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;font-size:12px;color:#5a6478;cursor:pointer;transition:all .15s;text-decoration:none;border-radius:10px;margin:2px 10px}
+.ni-l{display:flex;align-items:center;gap:10px}
+.ni:hover{background:#F5F7FF;color:var(--blue)}
+.ni.active{background:var(--blue);color:#fff;font-weight:600;box-shadow:0 3px 12px rgba(67,97,238,.3)}
+.ni.active svg{stroke:#fff}
+.ni svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+.ni-chev{width:10px;height:10px;flex-shrink:0;opacity:.45}
+.ni-badge{background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:700;flex-shrink:0}
+.sb-bot{padding:14px 16px;border-top:1px solid var(--brd);flex-shrink:0}
+.sb-illus{text-align:center;padding:4px 0 6px}
+.sb-school{text-align:center;font-size:12px;font-weight:700;color:var(--txt)}
+.sb-school-sub{text-align:center;font-size:10px;color:var(--muted);margin-bottom:2px}
+.sb-ver{text-align:center;font-size:10px;color:#c0c8d4;margin-bottom:8px}
+.logout{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:12px;color:var(--red);cursor:pointer;border-radius:8px;transition:background .15s;font-weight:500}
+.logout:hover{background:var(--red-bg)}
+.logout svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-width:0;transition:margin-left .25s ease}
+
+/* TOPBAR — exact match to image */
+.top{background:#fff;border-bottom:1px solid var(--brd);padding:0 24px;display:flex;align-items:center;height:var(--th);position:sticky;top:0;z-index:50;gap:12px}
+.top-brand{flex:0 0 auto}
+.top-brand-title{font-size:20px;font-weight:800;color:var(--txt);letter-spacing:-.5px;line-height:1}
+.top-brand-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.top-search{flex:1;max-width:340px;margin-left:auto}
+.top-search-wrap{position:relative;display:flex;align-items:center}
+.top-search-wrap svg{position:absolute;left:11px;width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;pointer-events:none}
+.top-search-wrap input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--brd);border-radius:22px;font-size:12px;font-family:'Poppins',sans-serif;color:var(--txt);background:#F8FAFF;outline:none;transition:border-color .2s}
+.top-search-wrap input:focus{border-color:var(--blue);background:#fff}
+.top-search-wrap input::placeholder{color:var(--muted)}
+.top-r{display:flex;align-items:center;gap:14px;margin-left:16px;flex-shrink:0}
+.top-bell{position:relative;cursor:pointer}
+.top-bell svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2}
+.top-bell-badge{position:absolute;top:-3px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.top-date{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);border:1px solid var(--brd);border-radius:8px;padding:5px 10px;cursor:pointer;background:#F8FAFF}
+.top-date svg{width:13px;height:13px;stroke:var(--blue);fill:none;stroke-width:2}
+.top-divider{width:1px;height:30px;background:var(--brd)}
+.top-user{display:flex;align-items:center;gap:10px;cursor:pointer}
+.top-av{width:38px;height:38px;border-radius:50%;overflow:hidden;border:2px solid var(--brd);flex-shrink:0;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.top-av img{width:100%;height:100%;object-fit:cover}
+.top-user-info strong{display:block;font-size:12.5px;font-weight:700;color:var(--txt)}
+.top-user-info span{font-size:10px;color:var(--muted)}
+.top-caret{color:var(--muted);font-size:10px}
+
+/* CONTENT */
+.cnt{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+
+/* STAT CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.sc{background:#fff;border-radius:var(--radius);border:1px solid var(--brd);padding:18px 18px 14px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.sc-icon-wrap{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:12px}
+.sc-icon-wrap svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2}
+.sc-lbl{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:4px}
+.sc-val{font-size:clamp(22px,2.8vw,30px);font-weight:800;line-height:1;color:var(--txt)}
+.sc-tr{font-size:10px;font-weight:600;margin-top:5px}
+.sc-tr-link{font-size:10px;color:var(--blue);font-weight:600;cursor:pointer;margin-top:5px}
+.tr-up{color:var(--green)}.tr-dn{color:var(--red)}
+.sc-spark{margin-top:10px}
+
+/* BODY GRID */
+.body{display:grid;grid-template-columns:1fr 310px;gap:16px;align-items:start}
+.body-l{display:flex;flex-direction:column;gap:16px;min-width:0}
+.body-r{display:flex;flex-direction:column;gap:14px}
+
+/* CARDS */
+.card{background:#fff;border-radius:var(--radius);border:1px solid var(--brd);overflow:hidden;box-shadow:var(--shadow)}
+.ch{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--brd)}
+.ct{font-size:13px;font-weight:700;color:var(--txt)}
+.vl{font-size:11px;color:var(--blue);font-weight:600;cursor:pointer;text-decoration:none}
+.vl:hover{text-decoration:underline}
+.cb{padding:14px 18px}
+
+/* EVOLUTION CHART CARD */
+.evo-header{padding:16px 18px 0;display:flex;align-items:flex-start;justify-content:space-between}
+.evo-title{font-size:14px;font-weight:700;color:var(--txt)}
+.evo-period-btn{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--blue);border:1px solid var(--blue-bg);border-radius:8px;padding:5px 10px;cursor:pointer;background:var(--blue-bg)}
+.evo-period-btn svg{width:10px;height:10px;stroke:var(--blue);fill:none;stroke-width:2.5}
+.evo-chart-wrap{padding:4px 18px 16px}
+
+/* ACTIVITE TABLE */
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{text-align:left;padding:7px 12px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--brd);font-size:10px;text-transform:uppercase;letter-spacing:.4px;background:#FAFBFF}
+td{padding:10px 12px;border-bottom:1px solid #f4f6fd;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbff}
+.act-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.act-ico svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.act-cell{display:flex;align-items:center;gap:9px}
+.act-name{font-weight:600;font-size:11px;color:var(--txt)}
+.act-detail{font-size:10px;color:var(--muted);margin-top:1px}
+.act-time{font-size:10px;color:var(--muted);white-space:nowrap}
+
+/* ACTIONS RAPIDES */
+.aq-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;padding:14px 18px}
+.aq-item{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;padding:12px 4px 10px;border-radius:12px;border:1px solid var(--brd);background:#fff;transition:all .15s}
+.aq-item:hover{background:var(--blue-bg);border-color:var(--blue);transform:translateY(-2px);box-shadow:0 4px 14px rgba(67,97,238,.13)}
+.aq-ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.aq-ico svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.aq-lbl{font-size:9.5px;font-weight:600;color:var(--txt);text-align:center;line-height:1.3}
+
+/* ALERTES */
+.alrt-hd{padding:11px 16px;border-bottom:1px solid #ffe5cc;background:#FFF8F2;display:flex;align-items:center;justify-content:space-between}
+.alrt-hd-l{display:flex;align-items:center;gap:7px}
+.alrt-hd-l svg{width:14px;height:14px;stroke:var(--orange);fill:none;stroke-width:2}
+.alrt-hd-l span{font-size:12px;font-weight:700;color:var(--orange)}
+.alrt-item{display:flex;align-items:flex-start;justify-content:space-between;padding:9px 16px;border-bottom:1px solid #f8f9ff;gap:8px}
+.alrt-item:last-of-type{border-bottom:none}
+.alrt-l{display:flex;align-items:flex-start;gap:8px;flex:1;min-width:0}
+.alrt-emoji{font-size:14px;flex-shrink:0;margin-top:1px}
+.alrt-text{font-size:10.5px;line-height:1.5}
+.alrt-text strong{font-weight:700}
+.alrt-time{font-size:9.5px;color:var(--muted);white-space:nowrap;flex-shrink:0;margin-top:2px}
+.alrt-arr{color:#c8d0e0;flex-shrink:0;cursor:pointer;margin-top:2px}
+.alrt-arr svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* APPELS NON FAITS */
+.appel-hd{padding:12px 16px 10px;border-top:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.appel-hd-l{font-size:12px;font-weight:700;color:var(--txt)}
+.appel-row{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid #f4f6fd;gap:10px}
+.appel-row:last-of-type{border-bottom:none;margin-bottom:4px}
+.appel-l{display:flex;align-items:center;gap:9px}
+.appel-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.appel-ico svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.appel-lbl{font-size:11px;font-weight:600;color:var(--txt)}
+.appel-count{font-size:10px;color:var(--muted)}
+.appel-bar-wrap{width:60px;background:#EEF2FF;border-radius:3px;height:4px;overflow:hidden;margin-top:3px}
+.appel-bar{height:100%;border-radius:3px}
+
+/* PROGRESS */
+.pr{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:10.5px}
+.pr-lbl{width:70px;flex-shrink:0;font-weight:500;color:var(--txt);font-size:10px}
+.pr-bar{flex:1;height:6px;background:#EEF2FF;border-radius:4px;overflow:hidden}
+.pr-fill{height:100%;border-radius:4px;transition:width 1s ease}
+.pr-pct{width:34px;text-align:right;font-weight:700;font-size:10.5px}
+
+/* SKELETON */
+.skeleton{background:linear-gradient(90deg,#f0f4ff 25%,#e4eaff 50%,#f0f4ff 75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:4px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* BADGES */
+.stat-badge{position:absolute;top:10px;right:12px;font-size:8px;font-weight:700;padding:2px 8px;border-radius:12px}
+
+/* RESPONSIVE */
+@media(max-width:899px){
+  .hbg{display:flex}
+  .sb{transform:translateX(-100%)}
+  .sb.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .top{padding-left:60px}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .body{grid-template-columns:1fr;display:flex;flex-direction:column}
+  .body-r{width:100%}
+  .aq-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:599px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .aq-grid{grid-template-columns:repeat(4,1fr)}
+  .cnt{padding:12px}
+  table th:nth-child(4),table td:nth-child(4){display:none}
+}
+</style>
+</head>
+<body>
+
+<button class="hbg" id="hbg" aria-label="Menu">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div id="ov"></div>
+
+<!-- SIDEBAR -->
+<aside class="sb" id="sb">
+  <div class="sb-logo">
+    <div class="logo-w">
+      <div class="logo-box">
+        <img src="logo-hem.png" alt="HEM"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;flex-direction:column;">
+          <span style="font-size:13px;font-weight:900;color:var(--blue);letter-spacing:-1px">HEM</span>
+          <div style="height:2px;width:70%;background:var(--orange);border-radius:1px;margin-top:2px"></div>
+        </div>
+      </div>
+      <div>
+        <div class="logo-hem">HEM</div>
+        <div class="logo-bs">BUSINESS SCHOOL</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <a class="ni active" href="admin-dashboard.html">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Tableau de bord
+      </div>
+    </a>
+    <a class="ni" href="user-management.html">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Employés
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" onclick="window.location='student-management.html'">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        Étudiants
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="filieres-modules.html">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Filières &amp; Matières
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Absences
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Statistiques
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </div>
+      <div class="ni-badge" id="notifBadge">8</div>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Paramètres
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Rapports
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Logs d'activité
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Sauvegardes
+      </div>
+    </a>
+  </nav>
+  <div class="sb-bot">
+    <div class="sb-illus">
+      <svg width="80" height="60" viewBox="0 0 92 72" fill="none">
+        <rect x="10" y="48" width="50" height="8" rx="3" fill="#4361EE" opacity=".15"/>
+        <rect x="12" y="41" width="46" height="9" rx="3" fill="#4361EE" opacity=".25"/>
+        <rect x="14" y="33" width="42" height="10" rx="3" fill="#4361EE" opacity=".4"/>
+        <polygon points="46,8 22,20 46,26 70,20" fill="#1a1a2e"/>
+        <rect x="39" y="12" width="14" height="10" rx="2" fill="#2DC653"/>
+        <rect x="69" y="20" width="2" height="10" fill="#1a1a2e"/>
+        <circle cx="70" cy="31" r="2.5" fill="#FF6B2B"/>
+        <ellipse cx="75" cy="55" rx="7" ry="11" fill="#2DC653" opacity=".45" transform="rotate(-12 75 55)"/>
+        <ellipse cx="81" cy="51" rx="5" ry="9" fill="#2DC653" opacity=".65" transform="rotate(8 81 51)"/>
+        <rect x="75" y="58" width="4" height="11" rx="2" fill="#8B6B3D"/>
+      </svg>
+    </div>
+    <div class="sb-school">HEM Business School</div>
+    <div class="sb-school-sub">Système d'administration</div>
+    <div class="sb-ver">Version 2.0.0</div>
+    <div class="logout" onclick="handleLogout()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Se déconnecter
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main" id="main">
+
+  <!-- TOPBAR -->
+  <div class="top">
+    <div class="top-brand">
+      <div class="top-brand-title">Tableau de bord</div>
+      <div class="top-brand-sub">Vue d'ensemble du système</div>
+    </div>
+    <div class="top-search">
+      <div class="top-search-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Rechercher un étudiant, un cours,...">
+      </div>
+    </div>
+    <div class="top-r">
+      <div class="top-bell">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="top-bell-badge">8</div>
+      </div>
+      <div class="top-divider"></div>
+      <div class="top-date">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="topDate">23 Mai 2024</span>
+        <svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:var(--muted);fill:none;stroke-width:2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="top-divider"></div>
+      <div class="top-user">
+        <div class="top-av" id="uAv"><span id="uInit">AP</span></div>
+        <div class="top-user-info">
+          <strong id="uName">Admin Principal</strong>
+          <span id="uRole">Super Administrateur</span>
+        </div>
+        <span class="top-caret">▾</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="cnt">
+
+    <!-- STAT CARDS -->
+    <div class="stats-row">
+      <div class="sc">
+        <div class="sc-icon-wrap" style="background:var(--blue-bg)">
+          <svg style="stroke:var(--blue)" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <div class="sc-lbl">Étudiants</div>
+        <div class="sc-val" id="vEt">—</div>
+        <div class="sc-tr tr-up" id="tEt"></div>
+        <div class="sc-spark"><canvas id="cEt" height="32"></canvas></div>
+      </div>
+      <div class="sc">
+        <div class="sc-icon-wrap" style="background:var(--green-bg)">
+          <svg style="stroke:var(--green)" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="sc-lbl">Professeurs</div>
+        <div class="sc-val" id="vPr">—</div>
+        <div class="sc-tr tr-up" id="tPr"></div>
+        <div class="sc-spark"><canvas id="cPr" height="32"></canvas></div>
+      </div>
+      <div class="sc">
+        <div class="sc-icon-wrap" style="background:var(--orange-bg)">
+          <svg style="stroke:var(--orange)" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div class="sc-lbl">Absences aujourd'hui</div>
+        <div class="sc-val" id="vAb">—</div>
+        <div class="sc-tr tr-dn" id="tAb"></div>
+        <div class="sc-spark"><canvas id="cAb" height="32"></canvas></div>
+      </div>
+      <div class="sc">
+        <div class="sc-icon-wrap" style="background:var(--red-bg)">
+          <svg style="stroke:var(--red)" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="sc-lbl">Alertes actives</div>
+        <div class="sc-val" id="vAl">—</div>
+        <div class="sc-tr-link" id="tAl">Voir détails</div>
+        <div class="sc-spark"><canvas id="cAl" height="32"></canvas></div>
+      </div>
+    </div>
+
+    <!-- BODY GRID -->
+    <div class="body">
+      <div class="body-l">
+
+        <!-- EVOLUTION DES ABSENCES -->
+        <div class="card">
+          <div class="evo-header">
+            <div class="evo-title">Évolution des absences</div>
+            <div class="evo-period-btn">
+              6 derniers mois
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="evo-chart-wrap" style="position:relative;height:220px">
+            <canvas id="cEvo" style="min-height:190px;width:100%;display:block"></canvas>
+          </div>
+        </div>
+
+        <!-- ACTIVITE RECENTE -->
+        <div class="card">
+          <div class="ch">
+            <div class="ct">Activité récente</div>
+            <a href="#" class="vl">Voir toute l'activité</a>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Utilisateur</th>
+                  <th>Module</th>
+                  <th>Il y a</th>
+                </tr>
+              </thead>
+              <tbody id="tAct">
+                <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px"><div class="skeleton" style="margin:auto;height:12px;width:60%"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ACTIONS RAPIDES -->
+        <div class="card">
+          <div class="ch">
+            <div class="ct">Actions rapides</div>
+          </div>
+          <div class="aq-grid">
+            <div class="aq-item" onclick="window.location.href='student-management.html'">
+              <div class="aq-ico" style="background:var(--blue-bg)">
+                <svg style="stroke:var(--blue)" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              </div>
+              <div class="aq-lbl">Ajouter étudiant</div>
+            </div>
+            <div class="aq-item" onclick="window.location.href='user-management.html'">
+              <div class="aq-ico" style="background:var(--green-bg)">
+                <svg style="stroke:var(--green)" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              </div>
+              <div class="aq-lbl">Créer employé</div>
+            </div>
+            <div class="aq-item" onclick="window.location.href='student-management.html#import'">
+              <div class="aq-ico" style="background:var(--orange-bg)">
+                <svg style="stroke:var(--orange)" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <div class="aq-lbl">Importer CSV</div>
+            </div>
+            <div class="aq-item" onclick="window.location.href='filieres-modules.html'">
+              <div class="aq-ico" style="background:var(--purple-bg)">
+                <svg style="stroke:var(--purple)" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="10" y1="11" x2="14" y2="11"/></svg>
+              </div>
+              <div class="aq-lbl">Ajouter matière</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-ico" style="background:var(--red-bg)">
+                <svg style="stroke:var(--red)" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </div>
+              <div class="aq-lbl">Voir les absences</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-ico" style="background:var(--green-bg)">
+                <svg style="stroke:var(--green)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div class="aq-lbl">Justifier absence</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-ico" style="background:var(--blue-bg)">
+                <svg style="stroke:var(--blue)" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <div class="aq-lbl">Générer rapport</div>
+            </div>
+            <div class="aq-item">
+              <div class="aq-ico" style="background:#f4f6fb">
+                <svg style="stroke:var(--muted)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+              </div>
+              <div class="aq-lbl">Paramètres</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /body-l -->
+
+      <!-- RIGHT -->
+      <div class="body-r">
+
+        <!-- ALERTES AUTOMATIQUES -->
+        <div class="card" style="border:1px solid #FFD9B8">
+          <div class="alrt-hd">
+            <div class="alrt-hd-l">
+              <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+              <span>Alertes automatiques récentes</span>
+            </div>
+            <a href="#" class="vl">Voir toutes</a>
+          </div>
+          <div id="aList"></div>
+        </div>
+
+        <!-- APPELS NON FAITS -->
+        <div class="card">
+          <div class="appel-hd">
+            <div class="appel-hd-l">Appels non faits aujourd'hui</div>
+            <a href="#" class="vl">Voir tous les appels</a>
+          </div>
+          <div id="appelList"></div>
+        </div>
+
+      </div><!-- /body-r -->
+    </div><!-- /body -->
+  </div><!-- /cnt -->
+</div><!-- /main -->
+
+<script>
+/* ── CONFIG API ── */
+const API_BASE = 'http://localhost:8888/absence-management-app/backend/api/index.php?route=';
+const ROUTES = {
+    stats:     'dashboard/stats',
+    alerts:    'dashboard/alerts',
+    appels:    'dashboard/appels-non-faits',
+    activite:  'dashboard/activite',
+    evolution: 'stats/absences/evolution',
+};
+
+/* ── FALLBACK DEMO DATA ── */
+const FB = {
+  stats: {
+    etudiants:1248, etudiants_mois:12, etudiants_spark:[1180,1195,1210,1225,1238,1248],
+    profs:124,      profs_mois:3,      profs_spark:[110,114,117,119,122,124],
+    absences_jour:45, absences_hier:37, absences_spark:[30,42,28,55,37,45],
+    alertes:32, alertes_spark:[20,25,28,30,29,32],
+  },
+  alerts:[
+    {level:'warn',color:'#FF6B2B',count:12,text:'étudiants ont atteint 3 absences',note:'(Note participation = 00/20)',time:'Il y a 15 min'},
+    {level:'warn',color:'#FFB703',count:5,text:'étudiants ont atteint 6 absences',note:'(Note moyenne = 00/20)',time:'Il y a 28 min'},
+    {level:'warn',color:'#FF6B2B',count:2,text:'étudiants ont atteint 20 séances',note:'(Perd 1 rattrapage)',time:'Il y a 45 min'},
+    {level:'high',color:'#F72585',count:1,text:'étudiant a atteint 40 séances',note:'(Perd 2 rattrapages)',time:'Il y a 1 h'},
+    {level:'high',color:'#F72585',count:0,text:'étudiant a atteint 72 séances',note:'(Redoublant automatique)',time:'Il y a 2 h'},
+  ],
+  appels:[
+    {lbl:'Programmation Web – Groupe A',  count:'2/30',  pct:7,  color:'#4361EE', bg:'var(--blue-bg)',   ico_c:'var(--blue)'},
+    {lbl:'Base de données – Groupe B',     count:'5/28',  pct:18, color:'#2DC653', bg:'var(--green-bg)',  ico_c:'var(--green)'},
+    {lbl:'Réseaux – Groupe C',             count:'3/25',  pct:12, color:'#FF6B2B', bg:'var(--orange-bg)', ico_c:'var(--orange)'},
+    {lbl:'Algorithmique – Groupe D',       count:'4/26',  pct:15, color:'#9B5DE5', bg:'var(--purple-bg)', ico_c:'var(--purple)'},
+  ],
+  activite:[
+    {bg:'var(--green-bg)',ic:'var(--green)',ico:'user-plus',action:'Nouvel étudiant ajouté',name:'Youssef El Amrani',module:'Étudiants',time:'Il y a 15 min'},
+    {bg:'var(--blue-bg)',ic:'var(--blue)',ico:'check',action:'Absence justifiée',name:'Imane Essaidi – Programmation Web',module:'Absences',time:'Il y a 28 min'},
+    {bg:'var(--orange-bg)',ic:'var(--orange)',ico:'edit',action:'Matière modifiée',name:'Base de données – Semestre 4',module:'Filières & Mat.',time:'Il y a 45 min'},
+    {bg:'var(--green-bg)',ic:'var(--green)',ico:'user-plus',action:'Compte professeur créé',name:'Prof. Sara Benkirane',module:'Employés',time:'Il y a 1 h'},
+    {bg:'var(--blue-bg)',ic:'var(--blue)',ico:'upload',action:'Importation étudiants',name:'Fichier etudiants_mai_2024.csv',module:'Étudiants',time:'Il y a 2 h'},
+  ],
+  evolution:{
+    labels:['Déc','Jan','Fév','Mar','Avr','Mai'],
+    values:[20,40,60,68,55,80],
+  },
+};
+
+/* ── FETCH ── */
+async function apiFetch(route, fallback) {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+    
+    try {
+        // Token passé en paramètre GET + dans le header
+        const url = API_BASE + route + '&token=' + encodeURIComponent(token);
+        
+        const r = await fetch(url, {
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+    } catch(e) {
+        console.warn('[apiFetch] fallback pour', route, '→', e.message);
+        return fallback;
+    }
+}
+
+/* ── SPARKLINE ── */
+const _sp = {};
+function sparkline(id, data, color) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (_sp[id]) _sp[id].destroy();
+  _sp[id] = new Chart(el, {
+    type:'line',
+    data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:color,borderWidth:1.8,fill:true,backgroundColor:color+'22',tension:.45,pointRadius:0}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}},animation:false,responsive:true}
+  });
+}
+
+/* ── DATE TOPBAR ── */
+function setDate() {
+  const now = new Date();
+  const opts = {day:'numeric',month:'long',year:'numeric'};
+  document.getElementById('topDate').textContent = now.toLocaleDateString('fr-FR', opts);
+}
+
+/* ── RENDER STATS ── */
+function renderStats(d, live) {
+  // Si tout est à 0 et pas live, ne rien afficher
+  document.getElementById('vEt').textContent = Number(d.etudiants).toLocaleString('fr-FR');
+  document.getElementById('tEt').textContent = (d.etudiants_mois >= 0 ? '+' : '') + d.etudiants_mois + ' ce mois';
+  document.getElementById('tEt').className = 'sc-tr ' + (d.etudiants_mois >= 0 ? 'tr-up' : 'tr-dn');
+
+  document.getElementById('vPr').textContent = Number(d.profs).toLocaleString('fr-FR');
+  document.getElementById('tPr').textContent = (d.profs_mois >= 0 ? '+' : '') + d.profs_mois + ' ce mois';
+  document.getElementById('tPr').className = 'sc-tr ' + (d.profs_mois >= 0 ? 'tr-up' : 'tr-dn');
+
+  document.getElementById('vAb').textContent = Number(d.absences_jour).toLocaleString('fr-FR');
+  const diff = d.absences_jour - d.absences_hier;
+  document.getElementById('tAb').textContent = (diff >= 0 ? '+' : '') + diff + ' vs hier';
+  document.getElementById('tAb').className = 'sc-tr ' + (diff > 0 ? 'tr-dn' : 'tr-up');
+
+  document.getElementById('vAl').textContent = Number(d.alertes || 0).toLocaleString('fr-FR');
+
+  sparkline('cEt', Array.isArray(d.etudiants_spark) ? d.etudiants_spark : [0,0,0,0,0,0], '#4361EE');
+  sparkline('cPr', Array.isArray(d.profs_spark)     ? d.profs_spark     : [0,0,0,0,0,0], '#2DC653');
+  sparkline('cAb', Array.isArray(d.absences_spark)  ? d.absences_spark  : [0,0,0,0,0,0], '#FF6B2B');
+  sparkline('cAl', Array.isArray(d.alertes_spark)   ? d.alertes_spark   : [0,0,0,0,0,0], '#F72585');
+
+  // Badge LIVE ou sans badge (plus de DÉMO)
+  document.querySelectorAll('.sc').forEach(c => {
+    let b = c.querySelector('.stat-badge');
+    if (live) {
+      if (!b) { b = document.createElement('div'); b.className = 'stat-badge'; c.appendChild(b); }
+      b.textContent = '● LIVE';
+      b.style.cssText = 'position:absolute;top:10px;right:12px;font-size:8px;font-weight:700;padding:2px 8px;border-radius:12px;background:#EDFBF1;color:#2DC653';
+    } else {
+      if (b) b.remove(); // pas de badge si pas live
+    }
+  });
+}
+
+/* ── RENDER ALERTS ── */
+function renderAlerts(list) {
+  if (!list || !list.length) {
+    document.getElementById('aList').innerHTML =
+      '<div style="padding:16px;text-align:center;color:var(--muted);font-size:11px">Aucune alerte pour le moment</div>';
+    return;
+  }
+  const icons = { warn: '⚠️', high: '🔴' };
+  document.getElementById('aList').innerHTML = list.map(a =>
+    `<div class="alrt-item">
+      <div class="alrt-l">
+        <span class="alrt-emoji">${icons[a.level] || '⚠️'}</span>
+        <span class="alrt-text"><strong style="color:${a.color}">${a.count} ${a.text}</strong><br>
+        <span style="color:var(--muted);font-size:9.5px">${a.note}</span></span>
+      </div>
+      <span class="alrt-time">${a.time || ''}</span>
+      <div class="alrt-arr"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>`
+  ).join('');
+}
+
+/* ── RENDER APPELS ── */
+function renderAppels(list) {
+  if (!list || !list.length) {
+    document.getElementById('appelList').innerHTML =
+      '<div style="padding:16px;text-align:center;color:var(--muted);font-size:11px">Aucun appel en attente</div>';
+    return;
+  }
+  const iconsMap = [
+    `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+    `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
+    `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+    `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`,
+  ];
+  document.getElementById('appelList').innerHTML = list.map((a, i) =>
+    `<div class="appel-row">
+      <div class="appel-l">
+        <div class="appel-ico" style="background:${a.bg};color:${a.ico_c}">${iconsMap[i % iconsMap.length]}</div>
+        <div>
+          <div class="appel-lbl">${a.lbl}</div>
+          <div class="appel-bar-wrap"><div class="appel-bar" style="width:${a.pct}%;background:${a.color}"></div></div>
+        </div>
+      </div>
+      <div class="appel-count" style="font-size:11px;font-weight:600;color:var(--muted)">${a.count} étudiants</div>
+    </div>`
+  ).join('');
+}
+
+/* ── RENDER ACTIVITE ── */
+const ICONS_SVG = {
+  'user-plus':`<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`,
+  'check':`<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`,
+  'edit':`<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  'upload':`<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+};
+function renderActivite(list) {
+  if (!list || !list.length) {
+    document.getElementById('tAct').innerHTML =
+      '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;font-size:11px">Aucune activité récente</td></tr>';
+    return;
+  }
+  document.getElementById('tAct').innerHTML = list.map(r =>
+    `<tr>
+      <td>
+        <div class="act-cell">
+          <div class="act-ico" style="background:${r.bg};color:${r.ic}">${ICONS_SVG[r.ico] || ICONS_SVG['check']}</div>
+          <div>
+            <div class="act-name">${r.action}</div>
+            <div class="act-detail">${r.name}</div>
+          </div>
+        </div>
+      </td>
+      <td style="color:var(--muted);font-size:10.5px">${r.module}</td>
+      <td style="color:var(--muted)">—</td>
+      <td class="act-time">${r.time}</td>
+    </tr>`
+  ).join('');
+}
+
+/* ── EVOLUTION CHART ── */
+let _evoChart = null;
+function renderEvolution(d) {
+  const el = document.getElementById('cEvo');
+  if (!el) return;
+  if (_evoChart) _evoChart.destroy();
+
+  const labels = (d && d.labels && d.labels.length) ? d.labels : ['Déc','Jan','Fév','Mar','Avr','Mai'];
+  const values = (d && d.values && d.values.length) ? d.values : [0,0,0,0,0,0];
+  const hasData = values.some(v => v > 0);
+
+  _evoChart = new Chart(el, {
+    type:'line',
+    data:{
+      labels: labels,                                          // ← labels pas d.labels
+      datasets:[{
+        data: hasData ? values : labels.map(() => null),      // ← values pas d.values
+        borderColor:'#4361EE',
+        borderWidth:2.5,
+        fill:true,
+        backgroundColor:'rgba(67,97,238,0.08)',
+        tension:.45,
+        pointBackgroundColor:'#4361EE',
+        pointRadius: hasData ? 4 : 0,
+        pointHoverRadius: hasData ? 6 : 0,
+        spanGaps: false,
+      }]
+    },
+    options:{
+      plugins:{ legend:{display:false}, tooltip:{enabled: hasData} },
+      scales:{
+        x:{
+          display: true,
+          grid:{display:false},
+          ticks:{font:{family:'Poppins',size:11},color:'#8892a4'}
+        },
+        y:{
+          display: true,
+          min: 0,
+          max: hasData ? undefined : 10,
+          grid:{color:'#F0F4FF'},
+          ticks:{
+            font:{family:'Poppins',size:11},
+            color:'#8892a4',
+            callback: v => v
+          }
+        }
+      },
+      responsive: true,
+      maintainAspectRatio: false,    // ← CRUCIAL pour respecter la hauteur du conteneur
+      animation:{duration:800},
+    }
+  });
+}
+/* ── USER FROM SESSION ── */
+function initUser() {
+  try {
+    const u = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    if (u.first_name) {
+      document.getElementById('uName').textContent = u.first_name+' '+u.last_name;
+      document.getElementById('uRole').textContent = u.role==='admin'?'Super Administrateur':u.role;
+      document.getElementById('uInit').textContent = (u.first_name[0]+u.last_name[0]).toUpperCase();
+    }
+  } catch(e){}
+}
+
+/* ── LOAD ── */
+async function loadDashboard() {
+  initUser();
+  setDate();
+
+  const [statsRaw, alerts, appels, activite, evolution] = await Promise.all([
+    apiFetch(ROUTES.stats,     null),
+    apiFetch(ROUTES.alerts,    null),
+    apiFetch(ROUTES.appels,    null),
+    apiFetch(ROUTES.activite,  null),
+    apiFetch(ROUTES.evolution, null),
+  ]);
+
+  // Stats : live si le backend répond, sinon tout à 0
+  const statsLive = !!statsRaw;
+  const statsData = statsRaw || {
+    etudiants: 0, etudiants_mois: 0, etudiants_spark: [0,0,0,0,0,0],
+    profs: 0, profs_mois: 0, profs_spark: [0,0,0,0,0,0],
+    absences_jour: 0, absences_hier: 0, absences_spark: [0,0,0,0,0,0],
+    alertes: 0, alertes_spark: [0,0,0,0,0,0],
+  };
+  renderStats(statsData, statsLive);
+
+  // Alertes : tableau vide si rien
+  renderAlerts((alerts && alerts.length) ? alerts : []);
+
+  // Appels : tableau vide si rien
+  renderAppels((appels && appels.length) ? appels : []);
+
+  // Activité : tableau vide si rien
+  renderActivite((activite && activite.length) ? activite : []);
+
+  // Evolution : graphe vide si rien
+  const evoData = (evolution && evolution.labels && evolution.labels.length)
+    ? evolution
+    : { labels: ['Déc', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai'], values: [0, 0, 0, 0, 0, 0] };
+  renderEvolution(evoData);
+}
+/* ── HAMBURGER ── */
+const hbg=document.getElementById('hbg'),sb=document.getElementById('sb'),ov=document.getElementById('ov');
+hbg.addEventListener('click',()=>{sb.classList.add('open');ov.classList.add('show');document.body.style.overflow='hidden'});
+ov.addEventListener('click',()=>{sb.classList.remove('open');ov.classList.remove('show');document.body.style.overflow=''});
+sb.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>{if(window.innerWidth<900){sb.classList.remove('open');ov.classList.remove('show');document.body.style.overflow=''}}));
+
+/* ── LOGOUT ── */
+function handleLogout(){
+  if(confirm('Voulez-vous vous déconnecter ?')){
+    ['token','user'].forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k)});
+    window.location.href='login.html';
+  }
+}
+
+/* ── START ── */
+loadDashboard();
+setInterval(loadDashboard, 60000);
+</script>
+</body>
+</html>

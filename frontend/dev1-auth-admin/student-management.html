@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HEM — Gestion des Étudiants</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#4361EE;--blue-d:#3451d1;--blue-bg:#EEF2FF;
+  --green:#2DC653;--green-bg:#EDFBF1;
+  --orange:#FF6B2B;--orange-bg:#FFF0EA;
+  --purple:#9B5DE5;--purple-bg:#F3EBFF;
+  --red:#F72585;--red-bg:#FEE8F2;
+  --teal:#00B4D8;--yellow:#FFB703;
+  --sw:210px;--th:64px;
+  --txt:#1a1a2e;--muted:#8892a4;--brd:#E8EDF5;--bg:#F4F6FB;
+  --radius:14px;--shadow:0 2px 12px rgba(67,97,238,.08);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
+
+/* HAMBURGER */
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;backdrop-filter:blur(2px)}
+#ov.show{display:block}
+.hbg{display:none;position:fixed;top:13px;left:14px;z-index:200;background:#fff;border:1px solid var(--brd);border-radius:9px;width:38px;height:38px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(67,97,238,.12)}
+.hbg svg{width:18px;height:18px;stroke:var(--blue);stroke-width:2;fill:none}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;border-right:1px solid var(--brd);transition:transform .25s ease}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--brd);flex-shrink:0}
+.logo-w{display:flex;align-items:center;gap:10px}
+.logo-box{width:42px;height:42px;border:1.5px solid #dde3f4;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;overflow:hidden}
+.logo-box img{width:100%;height:100%;object-fit:contain;padding:3px}
+.logo-hem{font-size:19px;font-weight:900;color:var(--blue);letter-spacing:-1px;line-height:1}
+.logo-bs{font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-top:1px}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+.ni{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;font-size:12px;color:#5a6478;cursor:pointer;transition:all .15s;text-decoration:none;border-radius:10px;margin:2px 10px}
+.ni-l{display:flex;align-items:center;gap:10px}
+.ni:hover{background:#F5F7FF;color:var(--blue)}
+.ni.active{background:var(--blue);color:#fff;font-weight:600;box-shadow:0 3px 12px rgba(67,97,238,.3)}
+.ni.active svg{stroke:#fff}
+.ni svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+.ni-chev{width:10px;height:10px;flex-shrink:0;opacity:.45}
+.ni-badge{background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:700;flex-shrink:0}
+.sb-bot{padding:14px 16px;border-top:1px solid var(--brd);flex-shrink:0}
+.sb-illus{text-align:center;padding:4px 0 6px}
+.sb-school{text-align:center;font-size:12px;font-weight:700;color:var(--txt)}
+.sb-school-sub{text-align:center;font-size:10px;color:var(--muted);margin-bottom:2px}
+.sb-ver{text-align:center;font-size:10px;color:#c0c8d4;margin-bottom:8px}
+.logout{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:12px;color:var(--red);cursor:pointer;border-radius:8px;transition:background .15s;font-weight:500}
+.logout:hover{background:var(--red-bg)}
+.logout svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* TOPBAR */
+.top{background:#fff;border-bottom:1px solid var(--brd);padding:0 24px;display:flex;align-items:center;height:var(--th);position:sticky;top:0;z-index:50;gap:12px}
+.top-brand-title{font-size:20px;font-weight:800;color:var(--txt);letter-spacing:-.5px;line-height:1}
+.top-brand-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.top-search{flex:1;max-width:340px;margin-left:auto}
+.top-search-wrap{position:relative;display:flex;align-items:center}
+.top-search-wrap svg{position:absolute;left:11px;width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;pointer-events:none}
+.top-search-wrap input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--brd);border-radius:22px;font-size:12px;font-family:'Poppins',sans-serif;color:var(--txt);background:#F8FAFF;outline:none;transition:border-color .2s}
+.top-search-wrap input:focus{border-color:var(--blue);background:#fff}
+.top-search-wrap input::placeholder{color:var(--muted)}
+.top-r{display:flex;align-items:center;gap:14px;margin-left:16px;flex-shrink:0}
+.top-bell{position:relative;cursor:pointer}
+.top-bell svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2}
+.top-bell-badge{position:absolute;top:-3px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.top-date{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);border:1px solid var(--brd);border-radius:8px;padding:5px 10px;background:#F8FAFF}
+.top-date svg{width:13px;height:13px;stroke:var(--blue);fill:none;stroke-width:2}
+.top-divider{width:1px;height:30px;background:var(--brd)}
+.top-user{display:flex;align-items:center;gap:10px;cursor:pointer}
+.top-av{width:38px;height:38px;border-radius:50%;overflow:hidden;border:2px solid var(--brd);flex-shrink:0;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.top-user-info strong{display:block;font-size:12.5px;font-weight:700;color:var(--txt)}
+.top-user-info span{font-size:10px;color:var(--muted)}
+.top-caret{color:var(--muted);font-size:10px}
+
+/* CONTENT */
+.cnt{padding:20px;display:flex;flex-direction:column;gap:16px}
+
+/* PAGE HEADER */
+.page-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.page-hd-l h1{font-size:22px;font-weight:800;color:var(--txt);letter-spacing:-.5px}
+.page-hd-l p{font-size:11.5px;color:var(--muted);margin-top:2px}
+.page-hd-r{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'Poppins',sans-serif;transition:all .15s}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 3px 12px rgba(67,97,238,.3)}
+.btn-primary:hover{background:var(--blue-d);transform:translateY(-1px)}
+.btn-outline{background:#fff;color:var(--txt);border:1px solid var(--brd)}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 3px 12px rgba(45,198,83,.3)}
+.btn-green:hover{background:#25b34a;transform:translateY(-1px)}
+
+/* STATS STRIP */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.strip-card{background:#fff;border-radius:12px;border:1px solid var(--brd);padding:14px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.strip-ico{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.strip-ico svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2}
+.strip-lbl{font-size:10.5px;color:var(--muted);font-weight:500}
+.strip-val{font-size:22px;font-weight:800;color:var(--txt);line-height:1.1}
+.strip-sub{font-size:10px;font-weight:600;margin-top:2px}
+
+/* FILTERS */
+.filters{background:#fff;border-radius:var(--radius);border:1px solid var(--brd);padding:14px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:var(--shadow)}
+.filter-grp{display:flex;align-items:center;gap:8px;flex:1;min-width:180px}
+.filter-grp label{font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+.filter-sel{padding:7px 10px;border:1px solid var(--brd);border-radius:8px;font-size:11.5px;font-family:'Poppins',sans-serif;color:var(--txt);background:#F8FAFF;outline:none;cursor:pointer;transition:border-color .2s}
+.filter-sel:focus{border-color:var(--blue)}
+.filter-search{position:relative;flex:2;min-width:200px}
+.filter-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2;pointer-events:none}
+.filter-search input{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--brd);border-radius:8px;font-size:11.5px;font-family:'Poppins',sans-serif;color:var(--txt);background:#F8FAFF;outline:none;transition:border-color .2s}
+.filter-search input:focus{border-color:var(--blue);background:#fff}
+.filter-search input::placeholder{color:var(--muted)}
+
+/* TABLE CARD */
+.card{background:#fff;border-radius:var(--radius);border:1px solid var(--brd);overflow:hidden;box-shadow:var(--shadow)}
+.ch{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--brd)}
+.ct{font-size:13px;font-weight:700;color:var(--txt)}
+.ch-r{display:flex;align-items:center;gap:10px}
+.view-toggle{display:flex;border:1px solid var(--brd);border-radius:8px;overflow:hidden}
+.view-btn{padding:5px 9px;cursor:pointer;background:#fff;border:none;display:flex;align-items:center;transition:background .15s}
+.view-btn svg{width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2}
+.view-btn.active{background:var(--blue-bg)}
+.view-btn.active svg{stroke:var(--blue)}
+
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{text-align:left;padding:9px 14px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--brd);font-size:10px;text-transform:uppercase;letter-spacing:.4px;background:#FAFBFF;white-space:nowrap}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{color:var(--blue)}
+th .sort-ico{display:inline-block;margin-left:4px;opacity:.4;font-size:9px}
+td{padding:11px 14px;border-bottom:1px solid #f4f6fd;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbff}
+
+.stu-cell{display:flex;align-items:center;gap:10px}
+.stu-av{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--brd);flex-shrink:0;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;overflow:hidden}
+.stu-av img{width:100%;height:100%;object-fit:cover}
+.stu-name{font-weight:600;font-size:11.5px;color:var(--txt)}
+.stu-email{font-size:10px;color:var(--muted);margin-top:1px}
+.stu-code{font-size:11px;color:var(--muted);font-family:monospace;background:#F4F6FB;padding:2px 7px;border-radius:5px;font-weight:600}
+
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-orange{background:var(--orange-bg);color:var(--orange)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-purple{background:var(--purple-bg);color:var(--purple)}
+
+.act-btns{display:flex;align-items:center;gap:6px}
+.act-btn{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--brd);background:#fff;transition:all .15s}
+.act-btn svg{width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:2}
+.act-btn:hover.view-s{background:var(--blue-bg);border-color:var(--blue)}
+.act-btn:hover.view-s svg{stroke:var(--blue)}
+.act-btn:hover.edit-s{background:var(--orange-bg);border-color:var(--orange)}
+.act-btn:hover.edit-s svg{stroke:var(--orange)}
+.act-btn:hover.del-s{background:var(--red-bg);border-color:var(--red)}
+.act-btn:hover.del-s svg{stroke:var(--red)}
+
+/* PAGINATION */
+.pag{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--brd);font-size:11px;color:var(--muted)}
+.pag-btns{display:flex;gap:4px}
+.pag-btn{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--brd);background:#fff;font-size:11px;font-weight:600;color:var(--txt);transition:all .15s}
+.pag-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.pag-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pag-btn svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5}
+
+/* GRID VIEW */
+.grid-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:18px}
+.stu-card{border:1px solid var(--brd);border-radius:12px;padding:16px;text-align:center;transition:all .15s;cursor:pointer;background:#fff}
+.stu-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(67,97,238,.12);transform:translateY(-2px)}
+.stu-card-av{width:56px;height:56px;border-radius:50%;margin:0 auto 10px;border:2px solid var(--brd);background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;overflow:hidden}
+.stu-card-av img{width:100%;height:100%;object-fit:cover}
+.stu-card-name{font-weight:700;font-size:12px;color:var(--txt)}
+.stu-card-code{font-size:10px;color:var(--muted);margin:3px 0}
+.stu-card-fil{font-size:10px;font-weight:600;color:var(--blue);background:var(--blue-bg);padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px}
+
+/* EMPTY STATE */
+.empty{padding:48px 20px;text-align:center}
+.empty svg{width:48px;height:48px;stroke:#c8d0e0;fill:none;stroke-width:1.5;margin-bottom:12px}
+.empty-t{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:6px}
+.empty-s{font-size:12px;color:var(--muted)}
+
+/* MODAL */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;backdrop-filter:blur(3px);align-items:center;justify-content:center}
+.modal-ov.show{display:flex}
+.modal{background:#fff;border-radius:18px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:mIn .2s ease}
+@keyframes mIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-hd{padding:20px 24px 16px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.modal-hd h2{font-size:16px;font-weight:800;color:var(--txt)}
+.modal-close{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--brd);background:#fff;transition:all .15s}
+.modal-close:hover{background:var(--red-bg);border-color:var(--red)}
+.modal-close svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2}
+.modal-close:hover svg{stroke:var(--red)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--brd);display:flex;justify-content:flex-end;gap:10px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid.full{grid-template-columns:1fr}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:11px;font-weight:600;color:var(--txt)}
+.fg input,.fg select,.fg textarea{padding:9px 12px;border:1px solid var(--brd);border-radius:9px;font-size:12px;font-family:'Poppins',sans-serif;color:var(--txt);background:#F8FAFF;outline:none;transition:border-color .2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue);background:#fff}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--muted)}
+.fg textarea{resize:vertical;min-height:70px}
+.form-section{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:8px 0 4px;grid-column:1/-1;padding-top:6px;border-top:1px solid var(--brd)}
+.form-section:first-child{border-top:none;padding-top:0}
+
+/* IMPORT ZONE */
+.import-zone{border:2px dashed var(--brd);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s}
+.import-zone:hover,.import-zone.drag{border-color:var(--blue);background:var(--blue-bg)}
+.import-zone svg{width:36px;height:36px;stroke:var(--muted);fill:none;stroke-width:1.5;margin-bottom:10px}
+.import-zone.drag svg{stroke:var(--blue)}
+.import-zone p{font-size:12px;color:var(--muted)}
+.import-zone strong{color:var(--blue)}
+.import-zone input{display:none}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1a2e;color:#fff;padding:12px 18px;border-radius:12px;font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:500;display:flex;align-items:center;gap:10px;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke-width:2.5}
+.toast.success{background:#1a3a2a}
+.toast.success svg{stroke:var(--green)}
+.toast.error{background:#3a1a1a}
+.toast.error svg{stroke:var(--red)}
+
+/* RESPONSIVE */
+@media(max-width:899px){
+  .hbg{display:flex}
+  .sb{transform:translateX(-100%)}
+  .sb.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .top{padding-left:60px}
+  .strip{grid-template-columns:repeat(2,1fr)}
+  table th:nth-child(4),table td:nth-child(4),
+  table th:nth-child(5),table td:nth-child(5){display:none}
+}
+@media(max-width:599px){
+  .strip{grid-template-columns:repeat(2,1fr)}
+  .cnt{padding:12px}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<button class="hbg" id="hbg" aria-label="Menu">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div id="ov"></div>
+
+<!-- SIDEBAR -->
+<aside class="sb" id="sb">
+  <div class="sb-logo">
+    <div class="logo-w">
+      <div class="logo-box">
+        <img src="logo-hem.png" alt="HEM" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;flex-direction:column;">
+          <span style="font-size:13px;font-weight:900;color:var(--blue);letter-spacing:-1px">HEM</span>
+          <div style="height:2px;width:70%;background:var(--orange);border-radius:1px;margin-top:2px"></div>
+        </div>
+      </div>
+      <div>
+        <div class="logo-hem">HEM</div>
+        <div class="logo-bs">BUSINESS SCHOOL</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <a class="ni" href="admin-dashboard.html">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Tableau de bord
+      </div>
+    </a>
+    <a class="ni" href="user-management.html">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Employés
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni active" href="student-management.html">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        Étudiants
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="filieres-modules.html">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Filières &amp; Matières
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Absences
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Statistiques
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </div>
+      <div class="ni-badge">8</div>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Paramètres
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Rapports
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Logs d'activité
+      </div>
+      <svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <a class="ni" href="#">
+      <div class="ni-l">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Sauvegardes
+      </div>
+    </a>
+  </nav>
+  <div class="sb-bot">
+    <div class="sb-illus">
+      <svg width="80" height="60" viewBox="0 0 92 72" fill="none">
+        <rect x="10" y="48" width="50" height="8" rx="3" fill="#4361EE" opacity=".15"/>
+        <rect x="12" y="41" width="46" height="9" rx="3" fill="#4361EE" opacity=".25"/>
+        <rect x="14" y="33" width="42" height="10" rx="3" fill="#4361EE" opacity=".4"/>
+        <polygon points="46,8 22,20 46,26 70,20" fill="#1a1a2e"/>
+        <rect x="39" y="12" width="14" height="10" rx="2" fill="#2DC653"/>
+        <rect x="69" y="20" width="2" height="10" fill="#1a1a2e"/>
+        <circle cx="70" cy="31" r="2.5" fill="#FF6B2B"/>
+        <ellipse cx="75" cy="55" rx="7" ry="11" fill="#2DC653" opacity=".45" transform="rotate(-12 75 55)"/>
+        <ellipse cx="81" cy="51" rx="5" ry="9" fill="#2DC653" opacity=".65" transform="rotate(8 81 51)"/>
+        <rect x="75" y="58" width="4" height="11" rx="2" fill="#8B6B3D"/>
+      </svg>
+    </div>
+    <div class="sb-school">HEM Business School</div>
+    <div class="sb-school-sub">Système d'administration</div>
+    <div class="sb-ver">Version 2.0.0</div>
+    <div class="logout" onclick="handleLogout()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Se déconnecter
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="top">
+    <div>
+      <div class="top-brand-title">Gestion des Étudiants</div>
+      <div class="top-brand-sub">Ajout, modification et suivi des étudiants</div>
+    </div>
+    <div class="top-search">
+      <div class="top-search-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="globalSearch" placeholder="Rechercher un étudiant, un cours,...">
+      </div>
+    </div>
+    <div class="top-r">
+      <div class="top-bell">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="top-bell-badge">8</div>
+      </div>
+      <div class="top-divider"></div>
+      <div class="top-date">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="topDate"></span>
+      </div>
+      <div class="top-divider"></div>
+      <div class="top-user">
+        <div class="top-av"><span id="uInit">AP</span></div>
+        <div class="top-user-info">
+          <strong id="uName">Admin Principal</strong>
+          <span id="uRole">Super Administrateur</span>
+        </div>
+        <span class="top-caret">▾</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="cnt">
+
+    <!-- PAGE HEADER -->
+    <div class="page-hd">
+      <div class="page-hd-l">
+        <h1>Étudiants</h1>
+        <p id="totalLabel">Chargement...</p>
+      </div>
+      <div class="page-hd-r">
+        <button class="btn btn-outline" onclick="openImportModal()">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Importer CSV
+        </button>
+        <button class="btn btn-primary" onclick="openAddModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ajouter étudiant
+        </button>
+      </div>
+    </div>
+
+    <!-- STATS STRIP -->
+    <div class="strip">
+      <div class="strip-card">
+        <div class="strip-ico" style="background:var(--blue-bg)">
+          <svg style="stroke:var(--blue)" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <div>
+          <div class="strip-lbl">Total étudiants</div>
+          <div class="strip-val" id="sTotal">—</div>
+          <div class="strip-sub tr-up" id="sMois"></div>
+        </div>
+      </div>
+      <div class="strip-card">
+        <div class="strip-ico" style="background:var(--green-bg)">
+          <svg style="stroke:var(--green)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div>
+          <div class="strip-lbl">Actifs</div>
+          <div class="strip-val" id="sActifs">—</div>
+          <div class="strip-sub" style="color:var(--green)" id="sPctActifs"></div>
+        </div>
+      </div>
+      <div class="strip-card">
+        <div class="strip-ico" style="background:var(--orange-bg)">
+          <svg style="stroke:var(--orange)" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div>
+          <div class="strip-lbl">En alerte</div>
+          <div class="strip-val" id="sAlertes">—</div>
+          <div class="strip-sub" style="color:var(--orange)">absences excessives</div>
+        </div>
+      </div>
+      <div class="strip-card">
+        <div class="strip-ico" style="background:var(--purple-bg)">
+          <svg style="stroke:var(--purple)" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div>
+          <div class="strip-lbl">Ajoutés ce mois</div>
+          <div class="strip-val" id="sCeMois">—</div>
+          <div class="strip-sub" style="color:var(--purple)">nouveaux inscrits</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters">
+      <div class="filter-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Rechercher par nom, email, code apogée...">
+      </div>
+      <div class="filter-grp">
+        <label>Filière</label>
+        <select id="filterFiliere" class="filter-sel">
+          <option value="">Toutes</option>
+        </select>
+      </div>
+      <div class="filter-grp">
+        <label>Statut</label>
+        <select id="filterStatut" class="filter-sel">
+          <option value="">Tous</option>
+          <option value="1">Actif</option>
+          <option value="0">Inactif</option>
+        </select>
+      </div>
+      <div class="filter-grp">
+        <label>Trier par</label>
+        <select id="filterSort" class="filter-sel">
+          <option value="name">Nom</option>
+          <option value="recent">Plus récent</option>
+          <option value="code">Code apogée</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+      <div class="ch">
+        <div class="ct">Liste des étudiants</div>
+        <div class="ch-r">
+          <div class="view-toggle">
+            <button class="view-btn active" id="btnTable" onclick="setView('table')" title="Vue tableau">
+              <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+            <button class="view-btn" id="btnGrid" onclick="setView('grid')" title="Vue grille">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE VIEW -->
+      <div id="tableView">
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th class="sortable" onclick="sortBy('name')">Étudiant <span class="sort-ico">↕</span></th>
+                <th>Code apogée</th>
+                <th>Filière</th>
+                <th>Campus</th>
+                <th>Statut</th>
+                <th>Absences</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- GRID VIEW -->
+      <div id="gridView" style="display:none">
+        <div class="grid-view" id="gridContainer"></div>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pag">
+        <span id="pagInfo">—</span>
+        <div class="pag-btns" id="pagBtns"></div>
+      </div>
+    </div>
+
+  </div><!-- /cnt -->
+</div><!-- /main -->
+
+<!-- ══ MODAL AJOUTER/MODIFIER ══ -->
+<div class="modal-ov" id="modalForm">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 id="modalTitle">Ajouter un étudiant</h2>
+      <div class="modal-close" onclick="closeModal('modalForm')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-grid">
+        <div class="form-section">Informations personnelles</div>
+        <div class="fg">
+          <label>Prénom *</label>
+          <input type="text" id="fPrenom" placeholder="Ex: Youssef">
+        </div>
+        <div class="fg">
+          <label>Nom *</label>
+          <input type="text" id="fNom" placeholder="Ex: El Amrani">
+        </div>
+        <div class="fg">
+          <label>Email *</label>
+          <input type="email" id="fEmail" placeholder="youssef.elamrani@hem.ac.ma">
+        </div>
+        <div class="fg">
+          <label>Code Apogée *</label>
+          <input type="text" id="fCode" placeholder="Ex: 20240001">
+        </div>
+        <div class="form-section">Scolarité</div>
+        <div class="fg">
+          <label>Filière *</label>
+          <select id="fFiliere">
+            <option value="">Sélectionner...</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Groupe</label>
+          <select id="fGroupe">
+            <option value="">Sélectionner...</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Campus</label>
+          <select id="fCampus">
+            <option value="">Sélectionner...</option>
+            <option value="1">Casablanca</option>
+            <option value="2">Rabat</option>
+            <option value="3">Marrakech</option>
+            <option value="4">Tanger</option>
+          </select>
+        </div>
+        <div class="fg" style="grid-column:1/-1">
+          <label>Statut</label>
+          <select id="fStatut">
+            <option value="1">Actif</option>
+            <option value="0">Inactif</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalForm')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveStudent()">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL IMPORT CSV ══ -->
+<div class="modal-ov" id="modalImport">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2>Importer des étudiants (CSV)</h2>
+      <div class="modal-close" onclick="closeModal('modalImport')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="import-zone" id="dropZone" onclick="document.getElementById('csvFile').click()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p><strong>Cliquer pour choisir</strong> ou glisser-déposer un fichier CSV</p>
+        <p style="margin-top:6px;font-size:10.5px">Format attendu : prénom, nom, email, code_apogee, filiere_id</p>
+        <input type="file" id="csvFile" accept=".csv" onchange="handleCSV(this)">
+      </div>
+      <div id="csvPreview" style="margin-top:14px"></div>
+      <div style="margin-top:14px;padding:12px;background:#F8FAFF;border-radius:10px;border:1px solid var(--brd)">
+        <p style="font-size:11px;font-weight:700;color:var(--txt);margin-bottom:6px">📋 Exemple de format CSV :</p>
+        <code style="font-size:10px;color:var(--muted);display:block;line-height:1.8">
+          first_name,last_name,email,code_apogee,filiere_id<br>
+          Youssef,El Amrani,y.elamrani@hem.ac.ma,20240001,1<br>
+          Imane,Essaidi,i.essaidi@hem.ac.ma,20240002,2
+        </code>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalImport')">Annuler</button>
+      <button class="btn btn-green" id="btnImport" onclick="importCSV()" disabled>
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Importer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL DÉTAIL ÉTUDIANT ══ -->
+<div class="modal-ov" id="modalDetail">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2>Détail étudiant</h2>
+      <div class="modal-close" onclick="closeModal('modalDetail')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalDetail')">Fermer</button>
+      <button class="btn btn-primary" id="btnEditFromDetail">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Modifier
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg id="toastIco" viewBox="0 0 24 24"></svg>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+/* ── CONFIG ── */
+const API = 'http://localhost:8888/absence-management-app/backend/api/index.php?route=';
+const PER_PAGE = 15;
+
+let allStudents = [];
+let filtered    = [];
+let currentPage = 1;
+let currentView = 'table';
+let currentSort = 'name';
+let filieres    = [];
+let csvData     = [];
+
+/* ── AUTH ── */
+function getToken() {
+  return localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+}
+async function apiFetch(route, options = {}) {
+  const token = getToken();
+  const url   = API + route + '&token=' + encodeURIComponent(token);
+  const res   = await fetch(url, {
+    ...options,
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', ...(options.headers || {}) }
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+/* ── INIT ── */
+function initUser() {
+  try {
+    const u = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    if (u.first_name) {
+      document.getElementById('uName').textContent = u.first_name + ' ' + u.last_name;
+      document.getElementById('uRole').textContent = u.role === 'admin' ? 'Super Administrateur' : u.role;
+      document.getElementById('uInit').textContent = (u.first_name[0] + u.last_name[0]).toUpperCase();
+    }
+  } catch(e) {}
+}
+function setDate() {
+  document.getElementById('topDate').textContent = new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+}
+
+/* ── LOAD FILIERES ── */
+async function loadFilieres() {
+  try {
+    const data = await apiFetch('filieres');
+    filieres = Array.isArray(data) ? data : (data.data || []);
+  } catch(e) { filieres = []; }
+
+  const selFilter = document.getElementById('filterFiliere');
+  const selForm   = document.getElementById('fFiliere');
+  filieres.forEach(f => {
+    selFilter.innerHTML += `<option value="${f.id}">${f.name}</option>`;
+    selForm.innerHTML   += `<option value="${f.id}">${f.name}</option>`;
+  });
+}
+
+/* ── LOAD STUDENTS ── */
+async function loadStudents() {
+  try {
+    const data = await apiFetch('students');
+    allStudents = Array.isArray(data) ? data : (data.data || data.students || []);
+  } catch(e) {
+    allStudents = [];
+    showToast('Erreur de chargement des étudiants', 'error');
+  }
+  renderStats();
+  applyFilters();
+}
+
+/* ── STATS ── */
+function renderStats() {
+  const total  = allStudents.length;
+  const actifs = allStudents.filter(s => s.is_active == 1).length;
+  const mois   = allStudents.filter(s => {
+    if (!s.created_at) return false;
+    const d = new Date(s.created_at);
+    const n = new Date();
+    return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
+  }).length;
+
+  document.getElementById('sTotal').textContent   = total;
+  document.getElementById('sActifs').textContent  = actifs;
+  document.getElementById('sCeMois').textContent  = mois;
+  document.getElementById('sPctActifs').textContent = total ? Math.round(actifs/total*100) + '% du total' : '—';
+  document.getElementById('totalLabel').textContent = total + ' étudiant' + (total > 1 ? 's' : '') + ' enregistré' + (total > 1 ? 's' : '');
+
+  // Alertes : étudiants avec beaucoup d'absences (si donnée disponible)
+  const alertes = allStudents.filter(s => s.absence_count && s.absence_count >= 3).length;
+  document.getElementById('sAlertes').textContent = alertes;
+}
+
+/* ── FILTERS ── */
+function applyFilters() {
+  const search  = document.getElementById('searchInput').value.toLowerCase();
+  const filiere = document.getElementById('filterFiliere').value;
+  const statut  = document.getElementById('filterStatut').value;
+  const sort    = document.getElementById('filterSort').value;
+
+  filtered = allStudents.filter(s => {
+    const fullName = (s.first_name + ' ' + s.last_name).toLowerCase();
+    const matchS   = !search || fullName.includes(search) || (s.email||'').toLowerCase().includes(search) || (s.code_apogee||'').toLowerCase().includes(search);
+    const matchF   = !filiere || String(s.filiere_id) === filiere;
+    const matchSt  = statut === '' || String(s.is_active) === statut;
+    return matchS && matchF && matchSt;
+  });
+
+  filtered.sort((a, b) => {
+    if (sort === 'name')   return (a.first_name + a.last_name).localeCompare(b.first_name + b.last_name);
+    if (sort === 'recent') return new Date(b.created_at) - new Date(a.created_at);
+    if (sort === 'code')   return (a.code_apogee||'').localeCompare(b.code_apogee||'');
+    return 0;
+  });
+
+  currentPage = 1;
+  renderPage();
+}
+
+/* ── RENDER ── */
+function renderPage() {
+  const start = (currentPage - 1) * PER_PAGE;
+  const page  = filtered.slice(start, start + PER_PAGE);
+
+  if (currentView === 'table') renderTable(page);
+  else renderGrid(page);
+  renderPagination();
+}
+
+function getInitials(s) {
+  return ((s.first_name||'?')[0] + (s.last_name||'?')[0]).toUpperCase();
+}
+function getFiliereName(id) {
+  const f = filieres.find(f => String(f.id) === String(id));
+  return f ? f.name : (id ? 'Filière #' + id : '—');
+}
+function getStateBadge(s) {
+  if (!s.is_active || s.is_active == 0) return '<span class="badge badge-red">Inactif</span>';
+  if (s.absence_count >= 20) return '<span class="badge badge-red">Critique</span>';
+  if (s.absence_count >= 6)  return '<span class="badge badge-orange">Alerte</span>';
+  return '<span class="badge badge-green">Actif</span>';
+}
+
+function renderTable(page) {
+  const tbody = document.getElementById('tbody');
+  if (!page.length) {
+    tbody.innerHTML = `<tr><td colspan="7">
+      <div class="empty">
+        <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        <div class="empty-t">Aucun étudiant trouvé</div>
+        <div class="empty-s">Modifiez vos filtres ou ajoutez un étudiant</div>
+      </div>
+    </td></tr>`;
+    return;
+  }
+  tbody.innerHTML = page.map(s => `
+    <tr>
+      <td>
+        <div class="stu-cell">
+          <div class="stu-av">${s.photo ? `<img src="${s.photo}" alt="">` : getInitials(s)}</div>
+          <div>
+            <div class="stu-name">${s.first_name} ${s.last_name}</div>
+            <div class="stu-email">${s.email || '—'}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="stu-code">${s.code_apogee || '—'}</span></td>
+      <td style="font-size:11px;color:var(--txt)">${getFiliereName(s.filiere_id)}</td>
+      <td style="font-size:11px;color:var(--muted)">${s.campus_name || '—'}</td>
+      <td>${getStateBadge(s)}</td>
+      <td style="font-size:11px;font-weight:600;color:${(s.absence_count||0) >= 6 ? 'var(--red)' : 'var(--txt)'}">${s.absence_count || 0}</td>
+      <td>
+        <div class="act-btns">
+          <div class="act-btn view-s" onclick="viewStudent(${s.id})" title="Voir détails">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="act-btn edit-s" onclick="editStudent(${s.id})" title="Modifier">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div class="act-btn del-s" onclick="deleteStudent(${s.id},'${s.first_name} ${s.last_name}')" title="Supprimer">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </div>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function renderGrid(page) {
+  const gc = document.getElementById('gridContainer');
+  if (!page.length) {
+    gc.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      <div class="empty-t">Aucun étudiant trouvé</div>
+    </div>`;
+    return;
+  }
+  gc.innerHTML = page.map(s => `
+    <div class="stu-card" onclick="viewStudent(${s.id})">
+      <div class="stu-card-av">${s.photo ? `<img src="${s.photo}" alt="">` : getInitials(s)}</div>
+      <div class="stu-card-name">${s.first_name} ${s.last_name}</div>
+      <div class="stu-card-code">${s.code_apogee || '—'}</div>
+      <div class="stu-card-fil">${getFiliereName(s.filiere_id)}</div>
+    </div>`).join('');
+}
+
+/* ── PAGINATION ── */
+function renderPagination() {
+  const total = filtered.length;
+  const pages = Math.ceil(total / PER_PAGE);
+  const start = (currentPage - 1) * PER_PAGE + 1;
+  const end   = Math.min(currentPage * PER_PAGE, total);
+
+  document.getElementById('pagInfo').textContent = total
+    ? `${start}–${end} sur ${total} étudiant${total > 1 ? 's' : ''}`
+    : 'Aucun résultat';
+
+  const btns = document.getElementById('pagBtns');
+  btns.innerHTML = '';
+
+  const prev = document.createElement('div');
+  prev.className = 'pag-btn';
+  prev.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>`;
+  prev.onclick = () => { if (currentPage > 1) { currentPage--; renderPage(); } };
+  btns.appendChild(prev);
+
+  for (let i = 1; i <= pages; i++) {
+    if (pages > 7 && i > 2 && i < pages - 1 && Math.abs(i - currentPage) > 1) {
+      if (i === 3 || i === pages - 2) { const d = document.createElement('div'); d.className = 'pag-btn'; d.textContent = '…'; btns.appendChild(d); }
+      continue;
+    }
+    const b = document.createElement('div');
+    b.className = 'pag-btn' + (i === currentPage ? ' active' : '');
+    b.textContent = i;
+    b.onclick = ((p) => () => { currentPage = p; renderPage(); })(i);
+    btns.appendChild(b);
+  }
+
+  const next = document.createElement('div');
+  next.className = 'pag-btn';
+  next.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>`;
+  next.onclick = () => { if (currentPage < pages) { currentPage++; renderPage(); } };
+  btns.appendChild(next);
+}
+
+/* ── VIEW TOGGLE ── */
+function setView(v) {
+  currentView = v;
+  document.getElementById('tableView').style.display = v === 'table' ? '' : 'none';
+  document.getElementById('gridView').style.display  = v === 'grid'  ? '' : 'none';
+  document.getElementById('btnTable').classList.toggle('active', v === 'table');
+  document.getElementById('btnGrid').classList.toggle('active',  v === 'grid');
+  renderPage();
+}
+
+/* ── SORT ── */
+function sortBy(field) {
+  currentSort = field;
+  document.getElementById('filterSort').value = field;
+  applyFilters();
+}
+
+/* ── MODALS ── */
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function openAddModal() {
+  document.getElementById('modalTitle').textContent = 'Ajouter un étudiant';
+  document.getElementById('editId').value   = '';
+  document.getElementById('fPrenom').value  = '';
+  document.getElementById('fNom').value     = '';
+  document.getElementById('fEmail').value   = '';
+  document.getElementById('fCode').value    = '';
+  document.getElementById('fFiliere').value = '';
+  document.getElementById('fCampus').value  = '';
+  document.getElementById('fStatut').value  = '1';
+  openModal('modalForm');
+}
+
+function editStudent(id) {
+  const s = allStudents.find(s => s.id == id);
+  if (!s) return;
+  document.getElementById('modalTitle').textContent = 'Modifier l\'étudiant';
+  document.getElementById('editId').value   = s.id;
+  document.getElementById('fPrenom').value  = s.first_name || '';
+  document.getElementById('fNom').value     = s.last_name  || '';
+  document.getElementById('fEmail').value   = s.email      || '';
+  document.getElementById('fCode').value    = s.code_apogee|| '';
+  document.getElementById('fFiliere').value = s.filiere_id || '';
+  document.getElementById('fCampus').value  = s.campus_id  || '';
+  document.getElementById('fStatut').value  = s.is_active != null ? String(s.is_active) : '1';
+  closeModal('modalDetail');
+  openModal('modalForm');
+}
+
+function viewStudent(id) {
+  const s = allStudents.find(s => s.id == id);
+  if (!s) return;
+  document.getElementById('detailBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px;flex-shrink:0;border:2px solid var(--brd)">
+        ${getInitials(s)}
+      </div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--txt)">${s.first_name} ${s.last_name}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">${s.email || '—'}</div>
+        <div style="margin-top:6px">${getStateBadge(s)}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      ${detail('Code apogée', s.code_apogee || '—')}
+      ${detail('Filière', getFiliereName(s.filiere_id))}
+      ${detail('Campus', s.campus_name || (s.campus_id ? 'Campus #'+s.campus_id : '—'))}
+      ${detail('Absences totales', (s.absence_count || 0) + ' séances')}
+      ${detail('Inscrit le', s.created_at ? new Date(s.created_at).toLocaleDateString('fr-FR') : '—')}
+      ${detail('Statut', s.is_active == 1 ? 'Actif' : 'Inactif')}
+    </div>`;
+  document.getElementById('btnEditFromDetail').onclick = () => editStudent(id);
+  openModal('modalDetail');
+}
+function detail(label, val) {
+  return `<div style="background:#F8FAFF;border-radius:9px;padding:10px 12px;border:1px solid var(--brd)">
+    <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">${label}</div>
+    <div style="font-size:13px;font-weight:700;color:var(--txt)">${val}</div>
+  </div>`;
+}
+
+/* ── SAVE ── */
+async function saveStudent() {
+  const id = document.getElementById('editId').value;
+  const payload = {
+    first_name:  document.getElementById('fPrenom').value.trim(),
+    last_name:   document.getElementById('fNom').value.trim(),
+    email:       document.getElementById('fEmail').value.trim(),
+    code_apogee: document.getElementById('fCode').value.trim(),
+    filiere_id:  document.getElementById('fFiliere').value || null,
+    group_id: document.getElementById('fGroupe').value || null,
+    campus_id:   document.getElementById('fCampus').value || null,
+    is_active:   document.getElementById('fStatut').value,
+  };
+  if (!payload.first_name || !payload.last_name || !payload.email || !payload.code_apogee) {
+    showToast('Veuillez remplir tous les champs obligatoires', 'error'); return;
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(payload.email)) {
+    showToast('Format email invalide (ex: nom@hem.ac.ma)', 'error'); return;
+  }
+  try {
+    if (id) {
+      await apiFetch('students&id=' + id, { method: 'PUT', body: JSON.stringify(payload) });
+      showToast('Étudiant modifié avec succès', 'success');
+    } else {
+      await apiFetch('students', { method: 'POST', body: JSON.stringify(payload) });
+      showToast('Étudiant ajouté avec succès', 'success');
+    }
+    closeModal('modalForm');
+    loadStudents();
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'error');
+  }
+}
+
+/* ── DELETE ── */
+async function deleteStudent(id, name) {
+  if (!confirm(`Supprimer l'étudiant "${name}" ?\nCette action est irréversible.`)) return;
+  try {
+    await apiFetch('students&id=' + id, { method: 'DELETE' });
+    showToast('Étudiant supprimé', 'success');
+    loadStudents();
+  } catch(e) {
+    showToast('Erreur suppression : ' + e.message, 'error');
+  }
+}
+
+/* ── IMPORT CSV ── */
+function openImportModal() {
+  csvData = [];
+  document.getElementById('csvPreview').innerHTML = '';
+  document.getElementById('btnImport').disabled = true;
+  document.getElementById('csvFile').value = '';
+  openModal('modalImport');
+}
+
+function handleCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    csvData = lines.slice(1).map(line => {
+      const vals = line.split(',');
+      const obj  = {};
+      headers.forEach((h, i) => obj[h] = (vals[i] || '').trim());
+      return obj;
+    }).filter(r => r.first_name || r.last_name);
+
+    document.getElementById('csvPreview').innerHTML = `
+      <div style="background:var(--green-bg);border:1px solid var(--green);border-radius:10px;padding:10px 14px;font-size:11.5px;color:var(--green);font-weight:600">
+        ✅ ${csvData.length} étudiant(s) détecté(s) dans le fichier
+      </div>`;
+    document.getElementById('btnImport').disabled = csvData.length === 0;
+  };
+  reader.readAsText(file);
+}
+
+async function loadGroupesByFiliere(filiereId) {
+  const sel = document.getElementById('fGroupe');
+  sel.innerHTML = '<option value="">Sélectionner...</option>';
+  if (!filiereId) return;
+  try {
+    const data = await apiFetch('groups');
+    const filtered = data.filter(g => String(g.filiere_id) === String(filiereId));
+    filtered.forEach(g => {
+      sel.innerHTML += `<option value="${g.id}">${g.name}</option>`;
+    });
+  } catch(e) {}
+}
+
+async function importCSV() {
+  if (!csvData.length) return;
+  try {
+    const token = getToken();
+    const url   = API + 'import-students&token=' + encodeURIComponent(token);
+    const res   = await fetch(url, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ students: csvData })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showToast(csvData.length + ' étudiants importés avec succès', 'success');
+    closeModal('modalImport');
+    loadStudents();
+  } catch(e) {
+    showToast('Erreur import : ' + e.message, 'error');
+  }
+}
+
+/* ── DRAG DROP ── */
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) { const inp = document.getElementById('csvFile'); inp.files = e.dataTransfer.files; handleCSV(inp); }
+});
+
+/* ── TOAST ── */
+function showToast(msg, type = 'success') {
+  const t   = document.getElementById('toast');
+  const ico = document.getElementById('toastIco');
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = 'toast ' + type;
+  ico.innerHTML = type === 'success'
+    ? '<polyline points="20 6 9 17 4 12"/>'
+    : '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* ── HAMBURGER ── */
+const hbg = document.getElementById('hbg'), sb = document.getElementById('sb'), ov = document.getElementById('ov');
+hbg.addEventListener('click', () => { sb.classList.add('open'); ov.classList.add('show'); });
+ov.addEventListener('click',  () => { sb.classList.remove('open'); ov.classList.remove('show'); });
+
+/* ── LOGOUT ── */
+function handleLogout() {
+  if (confirm('Voulez-vous vous déconnecter ?')) {
+    ['token','user'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    window.location.href = 'login.html';
+  }
+}
+
+/* ── EVENTS ── */
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('filterFiliere').addEventListener('change', applyFilters);
+document.getElementById('filterStatut').addEventListener('change', applyFilters);
+document.getElementById('filterSort').addEventListener('change', applyFilters);
+document.getElementById('globalSearch').addEventListener('input', function() {
+  document.getElementById('searchInput').value = this.value;
+  applyFilters();
+});
+
+// Fermer modal en cliquant dehors
+document.querySelectorAll('.modal-ov').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
+
+document.getElementById('fFiliere').addEventListener('change', function() {
+  loadGroupesByFiliere(this.value);
+});
+
+/* ── START ── */
+initUser();
+setDate();
+loadFilieres();
+loadStudents();
+</script>
+</body>
+</html>

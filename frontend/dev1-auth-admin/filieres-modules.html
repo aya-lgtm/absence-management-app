@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HEM — Filières & Matières</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#4361EE;--blue-d:#3451d1;--blue-bg:#EEF2FF;
+  --green:#2DC653;--green-bg:#EDFBF1;
+  --orange:#FF6B2B;--orange-bg:#FFF0EA;
+  --purple:#9B5DE5;--purple-bg:#F3EBFF;
+  --red:#F72585;--red-bg:#FEE8F2;
+  --teal:#00B4D8;--teal-bg:#E0F7FC;
+  --yellow:#FFB703;--yellow-bg:#FFF8E1;
+  --sw:210px;--th:64px;
+  --txt:#1a1a2e;--muted:#8892a4;--brd:#E8EDF5;--bg:#F4F6FB;
+  --radius:14px;--shadow:0 2px 12px rgba(67,97,238,.08);
+}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh;font-size:13px;overflow-x:hidden}
+
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;backdrop-filter:blur(2px)}
+#ov.show{display:block}
+.hbg{display:none;position:fixed;top:13px;left:14px;z-index:200;background:#fff;border:1px solid var(--brd);border-radius:9px;width:38px;height:38px;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(67,97,238,.12)}
+.hbg svg{width:18px;height:18px;stroke:var(--blue);stroke-width:2;fill:none}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;border-right:1px solid var(--brd);transition:transform .25s ease}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid var(--brd);flex-shrink:0}
+.logo-w{display:flex;align-items:center;gap:10px}
+.logo-box{width:42px;height:42px;border:1.5px solid #dde3f4;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;overflow:hidden}
+.logo-box img{width:100%;height:100%;object-fit:contain;padding:3px}
+.logo-hem{font-size:19px;font-weight:900;color:var(--blue);letter-spacing:-1px;line-height:1}
+.logo-bs{font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-top:1px}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
+.ni{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;font-size:12px;color:#5a6478;cursor:pointer;transition:all .15s;text-decoration:none;border-radius:10px;margin:2px 10px}
+.ni-l{display:flex;align-items:center;gap:10px}
+.ni:hover{background:#F5F7FF;color:var(--blue)}
+.ni.active{background:var(--blue);color:#fff;font-weight:600;box-shadow:0 3px 12px rgba(67,97,238,.3)}
+.ni.active svg{stroke:#fff}
+.ni svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+.ni-chev{width:10px;height:10px;flex-shrink:0;opacity:.45}
+.ni-badge{background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:700;flex-shrink:0}
+.sb-bot{padding:14px 16px;border-top:1px solid var(--brd);flex-shrink:0}
+.sb-school{text-align:center;font-size:12px;font-weight:700;color:var(--txt)}
+.sb-school-sub{text-align:center;font-size:10px;color:var(--muted);margin-bottom:2px}
+.sb-ver{text-align:center;font-size:10px;color:#c0c8d4;margin-bottom:8px}
+.sb-illus{text-align:center;padding:4px 0 6px}
+.logout{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:12px;color:var(--red);cursor:pointer;border-radius:8px;transition:background .15s;font-weight:500}
+.logout:hover{background:var(--red-bg)}
+.logout svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* TOPBAR */
+.top{background:#fff;border-bottom:1px solid var(--brd);padding:0 24px;display:flex;align-items:center;height:var(--th);position:sticky;top:0;z-index:50;gap:12px}
+.top-brand-title{font-size:20px;font-weight:800;color:var(--txt);letter-spacing:-.5px}
+.top-brand-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.top-search{flex:1;max-width:340px;margin-left:auto}
+.top-search-wrap{position:relative}
+.top-search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;pointer-events:none}
+.top-search-wrap input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--brd);border-radius:22px;font-size:12px;font-family:'Poppins',sans-serif;color:var(--txt);background:#F8FAFF;outline:none;transition:border-color .2s}
+.top-search-wrap input:focus{border-color:var(--blue);background:#fff}
+.top-search-wrap input::placeholder{color:var(--muted)}
+.top-r{display:flex;align-items:center;gap:14px;margin-left:16px;flex-shrink:0}
+.top-bell{position:relative;cursor:pointer}
+.top-bell svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2}
+.top-bell-badge{position:absolute;top:-3px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.top-date{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);border:1px solid var(--brd);border-radius:8px;padding:5px 10px;background:#F8FAFF}
+.top-date svg{width:13px;height:13px;stroke:var(--blue);fill:none;stroke-width:2}
+.top-divider{width:1px;height:30px;background:var(--brd)}
+.top-user{display:flex;align-items:center;gap:10px;cursor:pointer}
+.top-av{width:38px;height:38px;border-radius:50%;border:2px solid var(--brd);flex-shrink:0;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+.top-user-info strong{display:block;font-size:12.5px;font-weight:700;color:var(--txt)}
+.top-user-info span{font-size:10px;color:var(--muted)}
+.top-caret{color:var(--muted);font-size:10px}
+
+/* CONTENT */
+.cnt{padding:20px;display:flex;flex-direction:column;gap:16px}
+
+/* PAGE HEADER */
+.page-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.page-hd-l h1{font-size:22px;font-weight:800;color:var(--txt);letter-spacing:-.5px}
+.page-hd-l p{font-size:11.5px;color:var(--muted);margin-top:2px}
+.page-hd-r{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'Poppins',sans-serif;transition:all .15s}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 3px 12px rgba(67,97,238,.3)}
+.btn-primary:hover{background:var(--blue-d);transform:translateY(-1px)}
+.btn-outline{background:#fff;color:var(--txt);border:1px solid var(--brd)}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 3px 12px rgba(45,198,83,.3)}
+.btn-green:hover{background:#25b34a;transform:translateY(-1px)}
+
+/* STATS STRIP */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.strip-card{background:#fff;border-radius:12px;border:1px solid var(--brd);padding:14px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.strip-ico{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.strip-ico svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2}
+.strip-lbl{font-size:10.5px;color:var(--muted);font-weight:500}
+.strip-val{font-size:22px;font-weight:800;color:var(--txt);line-height:1.1}
+.strip-sub{font-size:10px;font-weight:600;margin-top:2px}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid var(--brd);gap:0}
+.tab{padding:10px 20px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;display:flex;align-items:center;gap:7px}
+.tab:hover{color:var(--blue)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-count{background:var(--blue-bg);color:var(--blue);padding:1px 7px;border-radius:10px;font-size:10px}
+.tab.active .tab-count{background:var(--blue);color:#fff}
+
+/* BODY LAYOUT */
+.body-split{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+
+/* FILIERE LIST */
+.fil-list{background:#fff;border-radius:var(--radius);border:1px solid var(--brd);overflow:hidden;box-shadow:var(--shadow)}
+.fil-list-hd{padding:14px 16px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.fil-list-hd-t{font-size:12.5px;font-weight:700;color:var(--txt)}
+.fil-item{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #f4f6fd;cursor:pointer;transition:background .12s;gap:10px}
+.fil-item:last-child{border-bottom:none}
+.fil-item:hover{background:#F8FAFF}
+.fil-item.selected{background:var(--blue-bg);border-left:3px solid var(--blue)}
+.fil-item-l{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.fil-color{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.fil-name{font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fil-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.fil-count{font-size:10px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:2px 7px;border-radius:10px;flex-shrink:0}
+.fil-actions{display:flex;gap:4px;flex-shrink:0;opacity:0;transition:opacity .15s}
+.fil-item:hover .fil-actions{opacity:1}
+.fil-act-btn{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;border:1px solid var(--brd);background:#fff;cursor:pointer;transition:all .12s}
+.fil-act-btn svg{width:10px;height:10px;stroke:var(--muted);fill:none;stroke-width:2}
+.fil-act-btn:hover.edit-f{background:var(--orange-bg);border-color:var(--orange)}
+.fil-act-btn:hover.edit-f svg{stroke:var(--orange)}
+.fil-act-btn:hover.del-f{background:var(--red-bg);border-color:var(--red)}
+.fil-act-btn:hover.del-f svg{stroke:var(--red)}
+
+/* RIGHT PANEL */
+.panel{background:#fff;border-radius:var(--radius);border:1px solid var(--brd);overflow:hidden;box-shadow:var(--shadow)}
+.panel-hd{padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.panel-hd-l{display:flex;align-items:center;gap:10px}
+.panel-color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.panel-title{font-size:14px;font-weight:800;color:var(--txt)}
+.panel-sub{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* SEARCH IN PANEL */
+.panel-search{position:relative;width:220px}
+.panel-search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:2;pointer-events:none}
+.panel-search input{width:100%;padding:7px 10px 7px 28px;border:1px solid var(--brd);border-radius:8px;font-size:11.5px;font-family:'Poppins',sans-serif;color:var(--txt);background:#F8FAFF;outline:none}
+.panel-search input:focus{border-color:var(--blue);background:#fff}
+.panel-search input::placeholder{color:var(--muted)}
+
+/* MATIERE TABLE */
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{text-align:left;padding:9px 14px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--brd);font-size:10px;text-transform:uppercase;letter-spacing:.4px;background:#FAFBFF;white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid #f4f6fd;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbff}
+
+.mat-name{font-weight:600;font-size:12px;color:var(--txt)}
+.mat-code{font-size:10px;color:var(--muted);font-family:monospace;background:#F4F6FB;padding:2px 6px;border-radius:4px}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-orange{background:var(--orange-bg);color:var(--orange)}
+.badge-purple{background:var(--purple-bg);color:var(--purple)}
+.badge-teal{background:var(--teal-bg);color:var(--teal)}
+.badge-yellow{background:var(--yellow-bg);color:#b37800}
+
+.act-btns{display:flex;gap:6px}
+.act-btn{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--brd);background:#fff;transition:all .15s}
+.act-btn svg{width:11px;height:11px;stroke:var(--muted);fill:none;stroke-width:2}
+.act-btn:hover.edit-s{background:var(--orange-bg);border-color:var(--orange)}
+.act-btn:hover.edit-s svg{stroke:var(--orange)}
+.act-btn:hover.del-s{background:var(--red-bg);border-color:var(--red)}
+.act-btn:hover.del-s svg{stroke:var(--red)}
+
+/* EMPTY STATE */
+.empty{padding:48px 20px;text-align:center}
+.empty svg{width:44px;height:44px;stroke:#c8d0e0;fill:none;stroke-width:1.5;margin-bottom:12px}
+.empty-t{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:6px}
+.empty-s{font-size:12px;color:var(--muted)}
+
+/* NO SELECTION */
+.no-sel{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
+.no-sel svg{width:56px;height:56px;stroke:#d0d8e8;fill:none;stroke-width:1.5;margin-bottom:16px}
+.no-sel-t{font-size:15px;font-weight:700;color:var(--txt);margin-bottom:6px}
+.no-sel-s{font-size:12px;color:var(--muted)}
+
+/* MODAL */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;backdrop-filter:blur(3px);align-items:center;justify-content:center}
+.modal-ov.show{display:flex}
+.modal{background:#fff;border-radius:18px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:mIn .2s ease}
+@keyframes mIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-hd{padding:20px 24px 16px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between}
+.modal-hd h2{font-size:16px;font-weight:800;color:var(--txt)}
+.modal-close{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid var(--brd);transition:all .15s}
+.modal-close:hover{background:var(--red-bg);border-color:var(--red)}
+.modal-close svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2}
+.modal-close:hover svg{stroke:var(--red)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--brd);display:flex;justify-content:flex-end;gap:10px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:11px;font-weight:600;color:var(--txt)}
+.fg input,.fg select,.fg textarea{padding:9px 12px;border:1px solid var(--brd);border-radius:9px;font-size:12px;font-family:'Poppins',sans-serif;color:var(--txt);background:#F8FAFF;outline:none;transition:border-color .2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue);background:#fff}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--muted)}
+.fg textarea{resize:vertical;min-height:60px}
+.form-section{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;grid-column:1/-1;padding-top:8px;border-top:1px solid var(--brd);margin-top:4px}
+.form-section:first-child{border-top:none;padding-top:0;margin-top:0}
+
+/* COLOR PICKER */
+.color-picker{display:flex;gap:8px;flex-wrap:wrap;grid-column:1/-1}
+.cp-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0}
+.cp-dot:hover{transform:scale(1.15)}
+.cp-dot.selected{border-color:#fff;box-shadow:0 0 0 2px var(--blue)}
+
+/* IMPORT CSV ZONE */
+.import-zone{border:2px dashed var(--brd);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all .2s}
+.import-zone:hover,.import-zone.drag{border-color:var(--blue);background:var(--blue-bg)}
+.import-zone svg{width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;margin-bottom:8px}
+.import-zone.drag svg{stroke:var(--blue)}
+.import-zone p{font-size:12px;color:var(--muted)}
+.import-zone strong{color:var(--blue)}
+.import-zone input{display:none}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1a2e;color:#fff;padding:12px 18px;border-radius:12px;font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:500;display:flex;align-items:center;gap:10px;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke-width:2.5}
+.toast.success{background:#1a3a2a}.toast.success svg{stroke:var(--green)}
+.toast.error{background:#3a1a1a}.toast.error svg{stroke:var(--red)}
+
+@media(max-width:1024px){.body-split{grid-template-columns:250px 1fr}}
+@media(max-width:899px){
+  .hbg{display:flex}.sb{transform:translateX(-100%)}.sb.open{transform:translateX(0)}
+  .main{margin-left:0}.top{padding-left:60px}
+  .strip{grid-template-columns:repeat(2,1fr)}
+  .body-split{grid-template-columns:1fr;display:flex;flex-direction:column}
+}
+@media(max-width:599px){.strip{grid-template-columns:repeat(2,1fr)}.cnt{padding:12px}.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<button class="hbg" id="hbg" aria-label="Menu">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div id="ov"></div>
+
+<!-- SIDEBAR -->
+<aside class="sb" id="sb">
+  <div class="sb-logo">
+    <div class="logo-w">
+      <div class="logo-box">
+        <img src="logo-hem.png" alt="HEM" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;flex-direction:column;">
+          <span style="font-size:13px;font-weight:900;color:var(--blue);letter-spacing:-1px">HEM</span>
+          <div style="height:2px;width:70%;background:var(--orange);border-radius:1px;margin-top:2px"></div>
+        </div>
+      </div>
+      <div><div class="logo-hem">HEM</div><div class="logo-bs">BUSINESS SCHOOL</div></div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <a class="ni" href="admin-dashboard.html"><div class="ni-l"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Tableau de bord</div></a>
+    <a class="ni" href="user-management.html"><div class="ni-l"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Employés</div><svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+    <a class="ni" href="student-management.html"><div class="ni-l"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>Étudiants</div><svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+    <a class="ni active" href="filieres-modules.html"><div class="ni-l"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Filières &amp; Matières</div><svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+    <a class="ni" href="#"><div class="ni-l"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Absences</div><svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+    <a class="ni" href="#"><div class="ni-l"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Statistiques</div><svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+    <a class="ni" href="#"><div class="ni-l"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</div><div class="ni-badge">8</div></a>
+    <a class="ni" href="#"><div class="ni-l"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Paramètres</div><svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+    <a class="ni" href="#"><div class="ni-l"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Rapports</div><svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+    <a class="ni" href="#"><div class="ni-l"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Logs d'activité</div><svg class="ni-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
+    <a class="ni" href="#"><div class="ni-l"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Sauvegardes</div></a>
+  </nav>
+  <div class="sb-bot">
+    <div class="sb-illus">
+      <svg width="80" height="60" viewBox="0 0 92 72" fill="none">
+        <rect x="10" y="48" width="50" height="8" rx="3" fill="#4361EE" opacity=".15"/>
+        <rect x="12" y="41" width="46" height="9" rx="3" fill="#4361EE" opacity=".25"/>
+        <rect x="14" y="33" width="42" height="10" rx="3" fill="#4361EE" opacity=".4"/>
+        <polygon points="46,8 22,20 46,26 70,20" fill="#1a1a2e"/>
+        <rect x="39" y="12" width="14" height="10" rx="2" fill="#2DC653"/>
+        <rect x="69" y="20" width="2" height="10" fill="#1a1a2e"/>
+        <circle cx="70" cy="31" r="2.5" fill="#FF6B2B"/>
+        <ellipse cx="75" cy="55" rx="7" ry="11" fill="#2DC653" opacity=".45" transform="rotate(-12 75 55)"/>
+        <ellipse cx="81" cy="51" rx="5" ry="9" fill="#2DC653" opacity=".65" transform="rotate(8 81 51)"/>
+        <rect x="75" y="58" width="4" height="11" rx="2" fill="#8B6B3D"/>
+      </svg>
+    </div>
+    <div class="sb-school">HEM Business School</div>
+    <div class="sb-school-sub">Système d'administration</div>
+    <div class="sb-ver">Version 2.0.0</div>
+    <div class="logout" onclick="handleLogout()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Se déconnecter
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="top">
+    <div>
+      <div class="top-brand-title">Filières &amp; Matières</div>
+      <div class="top-brand-sub">Gestion des filières, matières et groupes</div>
+    </div>
+    <div class="top-search">
+      <div class="top-search-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="globalSearch" placeholder="Rechercher une filière, matière...">
+      </div>
+    </div>
+    <div class="top-r">
+      <div class="top-bell"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><div class="top-bell-badge">8</div></div>
+      <div class="top-divider"></div>
+      <div class="top-date"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="topDate"></span></div>
+      <div class="top-divider"></div>
+      <div class="top-user">
+        <div class="top-av"><span id="uInit">AP</span></div>
+        <div class="top-user-info"><strong id="uName">Admin Principal</strong><span id="uRole">Super Administrateur</span></div>
+        <span class="top-caret">▾</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cnt">
+
+    <!-- PAGE HEADER -->
+    <div class="page-hd">
+      <div class="page-hd-l">
+        <h1>Filières &amp; Matières</h1>
+        <p id="totalLabel">Chargement...</p>
+      </div>
+      <div class="page-hd-r">
+        <button class="btn btn-outline" onclick="openImportModal()">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Importer matières
+        </button>
+        <button class="btn btn-outline" onclick="openAddMatiereModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ajouter matière
+        </button>
+        <button class="btn btn-primary" onclick="openAddFiliereModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ajouter filière
+        </button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="strip">
+      <div class="strip-card">
+        <div class="strip-ico" style="background:var(--blue-bg)"><svg style="stroke:var(--blue)" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+        <div><div class="strip-lbl">Filières</div><div class="strip-val" id="sFilieres">—</div><div class="strip-sub" style="color:var(--blue)">programmes</div></div>
+      </div>
+      <div class="strip-card">
+        <div class="strip-ico" style="background:var(--green-bg)"><svg style="stroke:var(--green)" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div><div class="strip-lbl">Matières</div><div class="strip-val" id="sMatieres">—</div><div class="strip-sub" style="color:var(--green)">modules</div></div>
+      </div>
+      <div class="strip-card">
+        <div class="strip-ico" style="background:var(--orange-bg)"><svg style="stroke:var(--orange)" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div><div class="strip-lbl">Groupes</div><div class="strip-val" id="sGroupes">—</div><div class="strip-sub" style="color:var(--orange)">classes</div></div>
+      </div>
+      <div class="strip-card">
+        <div class="strip-ico" style="background:var(--purple-bg)"><svg style="stroke:var(--purple)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div><div class="strip-lbl">Heures totales</div><div class="strip-val" id="sHeures">—</div><div class="strip-sub" style="color:var(--purple)">masse horaire</div></div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div style="background:#fff;border-radius:var(--radius);border:1px solid var(--brd);overflow:hidden;box-shadow:var(--shadow)">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('filieres')" id="tabFil">
+          Filières <span class="tab-count" id="tcFil">0</span>
+        </div>
+        <div class="tab" onclick="switchTab('matieres')" id="tabMat">
+          Toutes les matières <span class="tab-count" id="tcMat">0</span>
+        </div>
+        <div class="tab" onclick="switchTab('groupes')" id="tabGrp">
+          Groupes <span class="tab-count" id="tcGrp">0</span>
+        </div>
+      </div>
+
+      <!-- TAB: FILIERES + MATIERES SPLIT -->
+      <div id="panelFilieres" style="padding:16px">
+        <div class="body-split">
+          <!-- LEFT: Liste filières -->
+          <div class="fil-list">
+            <div class="fil-list-hd">
+              <div class="fil-list-hd-t">Filières</div>
+              <button class="btn btn-primary" style="padding:5px 10px;font-size:11px" onclick="openAddFiliereModal()">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter
+              </button>
+            </div>
+            <div id="filiereList">
+              <div class="empty"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><div class="empty-t">Aucune filière</div><div class="empty-s">Créez votre première filière</div></div>
+            </div>
+          </div>
+          <!-- RIGHT: Matières de la filière -->
+          <div class="panel" id="rightPanel">
+            <div class="no-sel">
+              <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              <div class="no-sel-t">Sélectionnez une filière</div>
+              <div class="no-sel-s">Cliquez sur une filière à gauche pour voir ses matières</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: TOUTES LES MATIERES -->
+      <div id="panelMatieres" style="display:none">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div class="panel-search" style="width:260px">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="matSearch" placeholder="Rechercher une matière..." oninput="filterMatieres()">
+          </div>
+          <select id="matFilterFil" class="filter-sel" style="padding:7px 10px;border:1px solid var(--brd);border-radius:8px;font-size:11.5px;font-family:'Poppins',sans-serif;background:#F8FAFF;outline:none" onchange="filterMatieres()">
+            <option value="">Toutes les filières</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr>
+              <th>Matière</th><th>Code</th><th>Filière</th><th>Semestre</th><th>Coeff.</th><th>Heures</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="tbodyMat"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: GROUPES -->
+      <div id="panelGroupes" style="display:none">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;color:var(--muted)">Groupes d'étudiants par filière</span>
+          <button class="btn btn-primary" style="padding:6px 12px;font-size:11px" onclick="openAddGroupeModal()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Ajouter groupe
+          </button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Groupe</th><th>Filière</th><th>Étudiants</th><th>Actions</th></tr></thead>
+            <tbody id="tbodyGrp"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MODAL FILIÈRE ══ -->
+<div class="modal-ov" id="modalFiliere">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 id="modalFiliereTitle">Ajouter une filière</h2>
+      <div class="modal-close" onclick="closeModal('modalFiliere')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="filiereEditId">
+      <div class="form-grid">
+        <div class="form-section">Informations</div>
+        <div class="fg" style="grid-column:1/-1">
+          <label>Nom de la filière *</label>
+          <input type="text" id="fFiliereName" placeholder="Ex: Bachelor Sciences du Management">
+        </div>
+        <div class="fg">
+          <label>Code *</label>
+          <input type="text" id="fFiliereCode" placeholder="Ex: BSM">
+        </div>
+        <div class="fg">
+          <label>Niveau</label>
+          <select id="fFiliereNiveau">
+            <option value="">Sélectionner...</option>
+            <option value="Licence">Licence</option>
+            <option value="Bachelor">Bachelor</option>
+            <option value="Master">Master</option>
+            <option value="MBA">MBA</option>
+            <option value="DUT">DUT</option>
+          </select>
+        </div>
+        <div class="fg">
+            <label>Campus *</label>
+            <select id="fFiliereCampus">
+              <option value="">Sélectionner...</option>
+              <option value="1">Casablanca</option>
+              <option value="2">Rabat</option>
+              <option value="3">Marrakech</option>
+              <option value="4">Tanger</option>
+            </select>
+          </div>
+        
+        <div class="form-section">Couleur d'identification</div>
+        <div class="color-picker" id="colorPicker"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalFiliere')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveFiliere()">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL MATIÈRE ══ -->
+<div class="modal-ov" id="modalMatiere">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 id="modalMatiereTitle">Ajouter une matière</h2>
+      <div class="modal-close" onclick="closeModal('modalMatiere')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="matiereEditId">
+      <div class="form-grid">
+        <div class="form-section">Informations</div>
+        <div class="fg" style="grid-column:1/-1">
+          <label>Nom de la matière *</label>
+          <input type="text" id="fMatiereName" placeholder="Ex: Programmation Web">
+        </div>
+        <div class="fg">
+          <label>Code</label>
+          <input type="text" id="fMatiereCode" placeholder="Ex: INF301">
+        </div>
+        <div class="fg">
+          <label>Filière *</label>
+          <select id="fMatiereFiliere"><option value="">Sélectionner...</option></select>
+        </div>
+        <div class="fg">
+          <label>Semestre</label>
+          <select id="fMatiereSemestre">
+            <option value="">—</option>
+            <option value="S1">Semestre 1</option>
+            <option value="S2">Semestre 2</option>
+            <option value="S3">Semestre 3</option>
+            <option value="S4">Semestre 4</option>
+            <option value="S5">Semestre 5</option>
+            <option value="S6">Semestre 6</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Coefficient</label>
+          <input type="number" id="fMatiereCoeff" placeholder="Ex: 2" min="1" max="10">
+        </div>
+        <div class="fg">
+          <label>Masse horaire (h)</label>
+          <input type="number" id="fMatiereHeures" placeholder="Ex: 30" min="1">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalMatiere')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveMatiere()">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL GROUPE ══ -->
+<div class="modal-ov" id="modalGroupe">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hd">
+      <h2 id="modalGroupeTitle">Ajouter un groupe</h2>
+      <div class="modal-close" onclick="closeModal('modalGroupe')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="groupeEditId">
+      <div class="form-grid">
+        <div class="form-section">Informations</div>
+        <div class="fg" style="grid-column:1/-1">
+          <label>Nom du groupe *</label>
+          <input type="text" id="fGroupeName" placeholder="Ex: Groupe A">
+        </div>
+        <div class="fg" style="grid-column:1/-1">
+          <label>Filière *</label>
+          <select id="fGroupeFiliere"><option value="">Sélectionner...</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalGroupe')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveGroupe()">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Enregistrer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL IMPORT ══ -->
+<div class="modal-ov" id="modalImport">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2>Importer des matières (CSV)</h2>
+      <div class="modal-close" onclick="closeModal('modalImport')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    </div>
+    <div class="modal-body">
+      <div class="import-zone" id="dropZone" onclick="document.getElementById('csvFile').click()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p><strong>Cliquer</strong> ou glisser-déposer un fichier CSV</p>
+        <p style="margin-top:6px;font-size:10.5px">Format : name, code, filiere_id, semestre, coefficient, heures</p>
+        <input type="file" id="csvFile" accept=".csv" onchange="handleCSV(this)">
+      </div>
+      <div id="csvPreview" style="margin-top:12px"></div>
+      <div style="margin-top:12px;padding:12px;background:#F8FAFF;border-radius:10px;border:1px solid var(--brd)">
+        <p style="font-size:11px;font-weight:700;color:var(--txt);margin-bottom:6px">📋 Exemple :</p>
+        <code style="font-size:10px;color:var(--muted);line-height:1.8;display:block">
+          name,code,filiere_id,semestre,coefficient,heures<br>
+          Programmation Web,INF301,1,S3,2,30<br>
+          Base de données,INF302,1,S3,3,45
+        </code>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalImport')">Annuler</button>
+      <button class="btn btn-green" id="btnImport" onclick="importCSV()" disabled>
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Importer
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg id="toastIco" viewBox="0 0 24 24"></svg><span id="toastMsg"></span></div>
+
+<script>
+const API = 'http://localhost:8888/absence-management-app/backend/api/index.php?route=';
+
+let filieres  = [];
+let matieres  = [];
+let groupes   = [];
+let selectedFiliereId = null;
+let selectedColor     = '#4361EE';
+let csvData           = [];
+
+const COLORS = ['#4361EE','#2DC653','#FF6B2B','#9B5DE5','#F72585','#00B4D8','#FFB703','#1a1a2e','#E63946','#2A9D8F'];
+const SEM_COLORS = {S1:'badge-blue',S2:'badge-green',S3:'badge-orange',S4:'badge-purple',S5:'badge-teal',S6:'badge-yellow'};
+
+/* ── AUTH ── */
+function getToken(){ return localStorage.getItem('token')||sessionStorage.getItem('token')||''; }
+async function apiFetch(route, options={}){
+  const token = getToken();
+  const url   = API+route+'&token='+encodeURIComponent(token);
+  const res   = await fetch(url,{...options,headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json',...(options.headers||{})}});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+/* ── INIT ── */
+function initUser(){
+  try{
+    const u=JSON.parse(localStorage.getItem('user')||sessionStorage.getItem('user')||'{}');
+    if(u.first_name){
+      document.getElementById('uName').textContent=u.first_name+' '+u.last_name;
+      document.getElementById('uRole').textContent=u.role==='admin'?'Super Administrateur':u.role;
+      document.getElementById('uInit').textContent=(u.first_name[0]+u.last_name[0]).toUpperCase();
+    }
+  }catch(e){}
+}
+function setDate(){ document.getElementById('topDate').textContent=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}); }
+
+/* ── COLOR PICKER ── */
+function buildColorPicker(){
+  const cp = document.getElementById('colorPicker');
+  cp.innerHTML = COLORS.map(c =>
+    `<div class="cp-dot ${c===selectedColor?'selected':''}" style="background:${c}" onclick="pickColor('${c}',this)"></div>`
+  ).join('');
+}
+function pickColor(color, el){
+  selectedColor = color;
+  document.querySelectorAll('.cp-dot').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+/* ── LOAD ALL ── */
+async function loadAll(){
+  await Promise.all([loadFilieres(), loadMatieres(), loadGroupes()]);
+  updateStats();
+  updateTabCounts();
+  populateFiliereSelects();
+}
+
+async function loadFilieres(){
+  try{
+    const d = await apiFetch('filieres');
+    filieres = Array.isArray(d)?d:(d.data||[]);
+  }catch(e){ filieres=[]; }
+  renderFiliereList();
+}
+async function loadMatieres(){
+  try{
+    const d = await apiFetch('subjects');
+    matieres = Array.isArray(d)?d:(d.data||[]);
+  }catch(e){ matieres=[]; }
+  renderAllMatieres();
+}
+async function loadGroupes(){
+  try{
+    const d = await apiFetch('groups');
+    groupes = Array.isArray(d)?d:(d.data||[]);
+  }catch(e){ groupes=[]; }
+  renderGroupes();
+}
+
+/* ── STATS ── */
+function updateStats(){
+  const heures = matieres.reduce((s,m)=>s+(parseInt(m.heures||m.hours_total||0)),0);
+  document.getElementById('sFilieres').textContent = filieres.length;
+  document.getElementById('sMatieres').textContent = matieres.length;
+  document.getElementById('sGroupes').textContent  = groupes.length;
+  document.getElementById('sHeures').textContent   = heures+'h';
+  document.getElementById('totalLabel').textContent = filieres.length+' filière'+(filieres.length>1?'s':'')+', '+matieres.length+' matière'+(matieres.length>1?'s':'');
+}
+function updateTabCounts(){
+  document.getElementById('tcFil').textContent = filieres.length;
+  document.getElementById('tcMat').textContent = matieres.length;
+  document.getElementById('tcGrp').textContent = groupes.length;
+}
+function populateFiliereSelects(){
+  const opts = filieres.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
+  ['fMatiereFiliere','fGroupeFiliere','matFilterFil'].forEach(id=>{
+    const el = document.getElementById(id);
+    const base = id==='matFilterFil'?'<option value="">Toutes les filières</option>':'<option value="">Sélectionner...</option>';
+    el.innerHTML = base + opts;
+  });
+}
+
+/* ── TABS ── */
+function switchTab(tab) {
+  // Panels
+  document.getElementById('panelFilieres').style.display = tab === 'filieres' ? '' : 'none';
+  document.getElementById('panelMatieres').style.display = tab === 'matieres' ? '' : 'none';
+  document.getElementById('panelGroupes').style.display  = tab === 'groupes'  ? '' : 'none';
+
+  // Tabs
+  document.getElementById('tabFil').classList.toggle('active', tab === 'filieres');
+  document.getElementById('tabMat').classList.toggle('active', tab === 'matieres');
+  document.getElementById('tabGrp').classList.toggle('active', tab === 'groupes');
+}
+
+/* ── RENDER FILIERES ── */
+function getFilColor(f){ return f.color||'#4361EE'; }
+function renderFiliereList(){
+  const el = document.getElementById('filiereList');
+  if(!filieres.length){
+    el.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><div class="empty-t">Aucune filière</div><div class="empty-s">Créez votre première filière</div></div>`;
+    return;
+  }
+  el.innerHTML = filieres.map(f=>{
+    const count = matieres.filter(m=>String(m.filiere_id)===String(f.id)).length;
+    return `<div class="fil-item${selectedFiliereId===f.id?' selected':''}" onclick="selectFiliere(${f.id})">
+      <div class="fil-item-l">
+        <div class="fil-color" style="background:${getFilColor(f)}"></div>
+        <div>
+          <div class="fil-name">${f.name}</div>
+          <div class="fil-sub">${f.code||''} ${f.niveau?'· '+f.niveau:''}</div>
+        </div>
+      </div>
+      <span class="fil-count">${count}</span>
+      <div class="fil-actions">
+        <div class="fil-act-btn edit-f" onclick="event.stopPropagation();editFiliere(${f.id})" title="Modifier"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="fil-act-btn del-f" onclick="event.stopPropagation();deleteFiliere(${f.id},'${f.name}')" title="Supprimer"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectFiliere(id){
+  selectedFiliereId = id;
+  renderFiliereList();
+  renderFilierePanel(id);
+}
+
+function renderFilierePanel(id){
+  const fil = filieres.find(f=>f.id==id);
+  if(!fil) return;
+  const mats = matieres.filter(m=>String(m.filiere_id)===String(id));
+  const panel = document.getElementById('rightPanel');
+
+  panel.innerHTML = `
+    <div class="panel-hd">
+      <div class="panel-hd-l">
+        <div class="panel-color-dot" style="background:${getFilColor(fil)}"></div>
+        <div>
+          <div class="panel-title">${fil.name}</div>
+          <div class="panel-sub">${fil.code||''} · ${mats.length} matière${mats.length>1?'s':''}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <div class="panel-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Rechercher..." id="panelSearch" oninput="filterPanelMatieres(${id})">
+        </div>
+        <button class="btn btn-primary" style="padding:6px 12px;font-size:11px;white-space:nowrap" onclick="openAddMatiereModal(${id})">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ajouter
+        </button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Matière</th><th>Code</th><th>Semestre</th><th>Coeff.</th><th>Heures</th><th>Actions</th></tr></thead>
+        <tbody id="panelTbody">${renderMatieresRows(mats)}</tbody>
+      </table>
+    </div>`;
+}
+
+function filterPanelMatieres(id){
+  const q    = document.getElementById('panelSearch').value.toLowerCase();
+  const mats = matieres.filter(m=>String(m.filiere_id)===String(id)&&(m.name||'').toLowerCase().includes(q));
+  document.getElementById('panelTbody').innerHTML = renderMatieresRows(mats);
+}
+
+function renderMatieresRows(mats) {
+  if (!mats.length) return `<tr><td colspan="6"><div class="empty">...Aucune matière...</div></td></tr>`;
+  return mats.map(m => `
+    <tr>
+      <td><div class="mat-name">${m.name}</div></td>
+      <td><span class="mat-code">${m.code || '—'}</span></td>
+      <td>${m.semestre ? `<span class="badge ${SEM_COLORS[m.semestre] || 'badge-blue'}">${m.semestre}</span>` : '—'}</td>
+      <td style="font-size:12px;font-weight:700;color:var(--txt)">${m.credits || '—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${m.volume_horaire || '—'}h</td>
+      <td><div class="act-btns">
+        <div class="act-btn edit-s" onclick="editMatiere(${m.id})">...</div>
+        <div class="act-btn del-s" onclick="deleteMatiere(${m.id},'${m.name}')">...</div>
+      </div></td>
+    </tr>`).join('');
+}
+
+/* ── RENDER ALL MATIERES ── */
+function renderAllMatieres(){
+  filterMatieres();
+}
+function filterMatieres(){
+  const q   = (document.getElementById('matSearch')||{value:''}).value.toLowerCase();
+  const fil = (document.getElementById('matFilterFil')||{value:''}).value;
+  const list = matieres.filter(m=>{
+    const ms = !q||(m.name||'').toLowerCase().includes(q)||(m.code||'').toLowerCase().includes(q);
+    const mf = !fil||String(m.filiere_id)===fil;
+    return ms&&mf;
+  });
+  const tbody = document.getElementById('tbodyMat');
+  if(!list.length){
+    tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div class="empty-t">Aucune matière</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(m=>{
+    const fil = filieres.find(f=>String(f.id)===String(m.filiere_id));
+    return `<tr>
+      <td><div class="mat-name">${m.name}</div></td>
+      <td><span class="mat-code">${m.code||'—'}</span></td>
+      <td>${fil?`<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px"><span style="width:8px;height:8px;border-radius:50%;background:${getFilColor(fil)};flex-shrink:0"></span>${fil.name}</span>`:'—'}</td>
+      <td>${m.semestre?`<span class="badge ${SEM_COLORS[m.semestre]||'badge-blue'}">${m.semestre}</span>`:'—'}</td>
+      <td style="font-size:12px;font-weight:700">${m.coefficient||m.coeff||'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${m.heures||m.hours_total||'—'}h</td>
+      <td><div class="act-btns">
+        <div class="act-btn edit-s" onclick="editMatiere(${m.id})"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="act-btn del-s" onclick="deleteMatiere(${m.id},'${m.name}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg></div>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── RENDER GROUPES ── */
+function renderGroupes(){
+  const tbody = document.getElementById('tbodyGrp');
+  if(!groupes.length){
+    tbody.innerHTML=`<tr><td colspan="4"><div class="empty"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><div class="empty-t">Aucun groupe</div><div class="empty-s">Créez des groupes d'étudiants</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = groupes.map(g=>{
+    const fil = filieres.find(f=>String(f.id)===String(g.filiere_id));
+    return `<tr>
+      <td style="font-weight:600;font-size:12px">${g.name}</td>
+      <td>${fil?`<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px"><span style="width:8px;height:8px;border-radius:50%;background:${getFilColor(fil)}"></span>${fil.name}</span>`:'—'}</td>
+      <td style="font-size:12px;color:var(--muted)">${g.student_count||0} étudiant${(g.student_count||0)>1?'s':''}</td>
+      <td><div class="act-btns">
+        <div class="act-btn edit-s" onclick="editGroupe(${g.id})"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="act-btn del-s" onclick="deleteGroupe(${g.id},'${g.name}')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg></div>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── MODALS ── */
+function openModal(id)  { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function openAddFiliereModal() {
+  document.getElementById('modalFiliereTitle').textContent = 'Ajouter une filière';
+  document.getElementById('filiereEditId').value   = '';
+  document.getElementById('fFiliereName').value    = '';
+  document.getElementById('fFiliereCode').value    = '';
+  document.getElementById('fFiliereCampus').value  = '';
+  selectedColor = '#4361EE';
+  buildColorPicker();
+  openModal('modalFiliere');
+}
+function editFiliere(id) {
+  const f = filieres.find(f => f.id == id);
+  if (!f) return;
+  document.getElementById('modalFiliereTitle').textContent = 'Modifier la filière';
+  document.getElementById('filiereEditId').value   = f.id;
+  document.getElementById('fFiliereName').value    = f.name  || '';
+  document.getElementById('fFiliereCode').value    = f.code  || '';
+  document.getElementById('fFiliereCampus').value  = f.campus_id || '';
+  selectedColor = f.color || '#4361EE';
+  buildColorPicker();
+  openModal('modalFiliere');
+}
+
+function openAddMatiereModal(filiereId){
+  document.getElementById('modalMatiereTitle').textContent = 'Ajouter une matière';
+  document.getElementById('matiereEditId').value    = '';
+  document.getElementById('fMatiereName').value     = '';
+  document.getElementById('fMatiereCode').value     = '';
+  document.getElementById('fMatiereFiliere').value  = filiereId||selectedFiliereId||'';
+  document.getElementById('fMatiereSemestre').value = '';
+  document.getElementById('fMatiereCoeff').value    = '';
+  document.getElementById('fMatiereHeures').value   = '';
+  openModal('modalMatiere');
+}
+function editMatiere(id){
+  const m = matieres.find(m=>m.id==id);
+  if(!m) return;
+  document.getElementById('modalMatiereTitle').textContent = 'Modifier la matière';
+  document.getElementById('matiereEditId').value    = m.id;
+  document.getElementById('fMatiereName').value     = m.name||'';
+  document.getElementById('fMatiereCode').value     = m.code||'';
+  document.getElementById('fMatiereFiliere').value  = m.filiere_id||'';
+  document.getElementById('fMatiereSemestre').value = m.semestre||'';
+  document.getElementById('fMatiereCoeff').value    = m.coefficient||m.coeff||'';
+  document.getElementById('fMatiereHeures').value   = m.heures||m.hours_total||'';
+  openModal('modalMatiere');
+}
+
+function openAddGroupeModal(){
+  document.getElementById('modalGroupeTitle').textContent = 'Ajouter un groupe';
+  document.getElementById('groupeEditId').value    = '';
+  document.getElementById('fGroupeName').value     = '';
+  document.getElementById('fGroupeFiliere').value  = selectedFiliereId||'';
+  openModal('modalGroupe');
+}
+function editGroupe(id){
+  const g = groupes.find(g=>g.id==id);
+  if(!g) return;
+  document.getElementById('modalGroupeTitle').textContent = 'Modifier le groupe';
+  document.getElementById('groupeEditId').value   = g.id;
+  document.getElementById('fGroupeName').value    = g.name||'';
+  document.getElementById('fGroupeFiliere').value = g.filiere_id||'';
+  openModal('modalGroupe');
+}
+
+/* ── SAVE FILIERE ── */
+async function saveFiliere() {
+  const id = document.getElementById('filiereEditId').value;
+  const campus = document.getElementById('fFiliereCampus').value;
+  
+  if (!campus) { showToast('Veuillez sélectionner un campus', 'error'); return; }
+  
+  const payload = {
+    name:      document.getElementById('fFiliereName').value.trim(),
+    code:      document.getElementById('fFiliereCode').value.trim(),
+    campus_id: campus,
+  };
+  if (!payload.name) { showToast('Le nom est obligatoire', 'error'); return; }
+  try {
+    if (id) await apiFetch('filieres&id=' + id, { method: 'PUT', body: JSON.stringify(payload) });
+    else    await apiFetch('filieres', { method: 'POST', body: JSON.stringify(payload) });
+    showToast(id ? 'Filière modifiée' : 'Filière créée', 'success');
+    closeModal('modalFiliere');
+    await loadFilieres();
+    updateStats(); updateTabCounts(); populateFiliereSelects();
+  } catch(e) { showToast('Erreur : ' + e.message, 'error'); }
+}
+/* ── SAVE MATIERE ── */
+async function saveMatiere(){
+  const id = document.getElementById('matiereEditId').value;
+  const payload = {
+    name:        document.getElementById('fMatiereName').value.trim(),
+    code:        document.getElementById('fMatiereCode').value.trim(),
+    filiere_id:  document.getElementById('fMatiereFiliere').value||null,
+    semestre:    document.getElementById('fMatiereSemestre').value,
+    coefficient: document.getElementById('fMatiereCoeff').value||null,
+    heures:      document.getElementById('fMatiereHeures').value||null,
+  };
+  if(!payload.name){ showToast('Le nom est obligatoire','error'); return; }
+  try{
+    if(id) await apiFetch('subjects&id='+id,{method:'PUT',body:JSON.stringify(payload)});
+    else   await apiFetch('subjects',{method:'POST',body:JSON.stringify(payload)});
+    showToast(id?'Matière modifiée':'Matière créée','success');
+    closeModal('modalMatiere');
+    await loadMatieres();
+    updateStats(); updateTabCounts();
+    if(selectedFiliereId) renderFilierePanel(selectedFiliereId);
+  }catch(e){ showToast('Erreur : '+e.message,'error'); }
+}
+
+/* ── SAVE GROUPE ── */
+async function saveGroupe(){
+  const id = document.getElementById('groupeEditId').value;
+  const payload = {
+    name:       document.getElementById('fGroupeName').value.trim(),
+    filiere_id: document.getElementById('fGroupeFiliere').value||null,
+  };
+  if(!payload.name){ showToast('Le nom est obligatoire','error'); return; }
+  try{
+    if(id) await apiFetch('groups&id='+id,{method:'PUT',body:JSON.stringify(payload)});
+    else   await apiFetch('groups',{method:'POST',body:JSON.stringify(payload)});
+    showToast(id?'Groupe modifié':'Groupe créé','success');
+    closeModal('modalGroupe');
+    await loadGroupes();
+    updateStats(); updateTabCounts();
+  }catch(e){ showToast('Erreur : '+e.message,'error'); }
+}
+
+/* ── DELETE ── */
+async function deleteFiliere(id,name){
+  if(!confirm(`Supprimer la filière "${name}" ?\nToutes ses matières seront aussi supprimées.`)) return;
+  try{
+    await apiFetch('filieres&id='+id,{method:'DELETE'});
+    showToast('Filière supprimée','success');
+    if(selectedFiliereId===id){ selectedFiliereId=null; document.getElementById('rightPanel').innerHTML=`<div class="no-sel"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><div class="no-sel-t">Sélectionnez une filière</div><div class="no-sel-s">Cliquez sur une filière à gauche</div></div>`; }
+    await loadAll();
+  }catch(e){ showToast('Erreur : '+e.message,'error'); }
+}
+async function deleteMatiere(id,name){
+  if(!confirm(`Supprimer la matière "${name}" ?`)) return;
+  try{
+    await apiFetch('subjects&id='+id,{method:'DELETE'});
+    showToast('Matière supprimée','success');
+    await loadMatieres();
+    updateStats(); updateTabCounts();
+    if(selectedFiliereId) renderFilierePanel(selectedFiliereId);
+  }catch(e){ showToast('Erreur : '+e.message,'error'); }
+}
+async function deleteGroupe(id,name){
+  if(!confirm(`Supprimer le groupe "${name}" ?`)) return;
+  try{
+    await apiFetch('groups&id='+id,{method:'DELETE'});
+    showToast('Groupe supprimé','success');
+    await loadGroupes();
+    updateStats(); updateTabCounts();
+  }catch(e){ showToast('Erreur : '+e.message,'error'); }
+}
+
+/* ── IMPORT CSV ── */
+function openImportModal(){
+  csvData=[];
+  document.getElementById('csvPreview').innerHTML='';
+  document.getElementById('btnImport').disabled=true;
+  document.getElementById('csvFile').value='';
+  openModal('modalImport');
+}
+function handleCSV(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split('\n').filter(l=>l.trim());
+    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase());
+    csvData=lines.slice(1).map(line=>{
+      const vals=line.split(','); const obj={};
+      headers.forEach((h,i)=>obj[h]=(vals[i]||'').trim());
+      return obj;
+    }).filter(r=>r.name);
+    document.getElementById('csvPreview').innerHTML=`<div style="background:var(--green-bg);border:1px solid var(--green);border-radius:10px;padding:10px 14px;font-size:11.5px;color:var(--green);font-weight:600">✅ ${csvData.length} matière(s) détectée(s)</div>`;
+    document.getElementById('btnImport').disabled=csvData.length===0;
+  };
+  reader.readAsText(file);
+}
+async function importCSV(){
+  if(!csvData.length) return;
+  let ok=0;
+  for(const m of csvData){
+    try{ await apiFetch('subjects',{method:'POST',body:JSON.stringify(m)}); ok++; }catch(e){}
+  }
+  showToast(ok+' matière(s) importée(s)','success');
+  closeModal('modalImport');
+  await loadMatieres();
+  updateStats(); updateTabCounts();
+}
+
+/* ── DRAG DROP ── */
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f){const inp=document.getElementById('csvFile');inp.files=e.dataTransfer.files;handleCSV(inp);}});
+
+/* ── TOAST ── */
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  document.getElementById('toastIco').innerHTML=type==='success'?'<polyline points="20 6 9 17 4 12"/>':'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
+  t.className='toast '+type; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+/* ── HAMBURGER ── */
+const hbg=document.getElementById('hbg'),sb=document.getElementById('sb'),ov=document.getElementById('ov');
+hbg.addEventListener('click',()=>{sb.classList.add('open');ov.classList.add('show');});
+ov.addEventListener('click',()=>{sb.classList.remove('open');ov.classList.remove('show');});
+
+/* ── LOGOUT ── */
+function handleLogout(){
+  if(confirm('Voulez-vous vous déconnecter ?')){
+    ['token','user'].forEach(k=>{localStorage.removeItem(k);sessionStorage.removeItem(k);});
+    window.location.href='login.html';
+  }
+}
+
+/* ── GLOBAL SEARCH ── */
+document.getElementById('globalSearch').addEventListener('input',function(){
+  switchTab('matieres');
+  document.getElementById('matSearch').value=this.value;
+  filterMatieres();
+});
+
+/* ── CLOSE ON OUTSIDE CLICK ── */
+document.querySelectorAll('.modal-ov').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');});
+});
+
+/* ── START ── */
+initUser();
+setDate();
+loadAll();
+</script>
+</body>
+</html>

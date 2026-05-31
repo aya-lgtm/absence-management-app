@@ -28,8 +28,22 @@ function verifyToken($token) {
 }
 
 function requireAuth($role = null) {
-    $headers = getallheaders();
-    $auth    = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    $auth = '';
+    
+    // 1. Header standard
+    if (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+        $auth = $_SERVER['HTTP_AUTHORIZATION'];
+    } elseif (!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+        $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+    } else {
+        $headers = getallheaders();
+        $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+    }
+    
+    // 2. Fallback : token dans ?token=xxx (évite le problème Apache)
+    if (empty($auth) && !empty($_GET['token'])) {
+        $auth = 'Bearer ' . $_GET['token'];
+    }
 
     if (!str_starts_with($auth, 'Bearer ')) {
         http_response_code(401);
@@ -44,7 +58,6 @@ function requireAuth($role = null) {
         die(json_encode(['error' => 'Token expiré ou invalide']));
     }
 
-    // Vérifier le rôle si nécessaire
     if ($role) {
         $db   = getDB();
         $stmt = $db->prepare('SELECT role FROM users WHERE id = ? AND is_active = 1');
@@ -59,7 +72,6 @@ function requireAuth($role = null) {
 
     return $data['user_id'];
 }
-
 function getCurrentUser() {
     $headers = getallheaders();
     $auth    = $headers['Authorization'] ?? $headers['authorization'] ?? '';
